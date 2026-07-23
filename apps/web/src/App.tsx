@@ -8,10 +8,6 @@ import { Layout } from './components/layout/Layout';
 import { Login } from './pages/Login';
 import { Register } from './pages/Register';
 import { Home } from './pages/Home';
-import { Search } from './pages/Search';
-import { Discover } from './pages/Discover';
-import { Library } from './pages/Library';
-import { PlaylistDetail } from './pages/PlaylistDetail';
 
 const queryClient = new QueryClient({
   defaultOptions: { queries: { retry: 1, staleTime: 30000 } },
@@ -65,10 +61,6 @@ export function App() {
               }
             >
               <Route path="/" element={<Home />} />
-              <Route path="/search" element={<Search />} />
-              <Route path="/discover" element={<Discover />} />
-              <Route path="/library" element={<Library />} />
-              <Route path="/playlists/:id" element={<PlaylistDetail />} />
             </Route>
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>

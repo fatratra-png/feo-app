@@ -1,160 +1,132 @@
-import { useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
-import { youtubeApi, libraryApi } from '../lib/api';
+import { useRef, useEffect } from 'react';
+import { youtubeApi } from '../lib/api';
 import { TrackCard } from '../components/ui/TrackCard';
-import { CD } from '../components/ui/CD';
-import { usePlayerStore } from '../stores/playerStore';
+import { Search } from 'lucide-react';
+import { useDebounce } from '../hooks/useDebounce';
 
-const CATEGORIES = [
-  { id: 'pop', label: 'Pop', color: 'bg-brutal-pink', shadow: 'brutal-shadow-pink' },
-  { id: 'hiphop', label: 'Hip Hop', color: 'bg-brutal-orange', shadow: 'brutal-shadow-orange' },
-  { id: 'rnb', label: 'R&B', color: 'bg-brutal-purple', shadow: 'brutal-shadow-purple' },
-  { id: 'rock', label: 'Rock', color: 'bg-brutal-red', shadow: 'brutal-shadow-red' },
-  { id: 'electronic', label: 'Electronic', color: 'bg-brutal-teal', shadow: 'brutal-shadow-teal' },
-  { id: 'jazz', label: 'Jazz', color: 'bg-brutal-blue', shadow: 'brutal-shadow-blue' },
-  { id: 'classical', label: 'Classical', color: 'bg-brutal-green', shadow: 'brutal-shadow-green' },
-  { id: 'afro', label: 'Afro', color: 'bg-brutal-yellow', shadow: 'brutal-shadow-yellow' },
-  { id: 'latin', label: 'Latino', color: 'bg-brutal-pink', shadow: 'brutal-shadow-pink' },
-  { id: 'reggae', label: 'Reggae', color: 'bg-brutal-green', shadow: 'brutal-shadow-green' },
+const SUGGESTIONS = ['pop hits 2024', 'hip hop vibes', 'jazz relax', 'rock classics', 'electronic dance', 'afrobeat', 'latin party', 'reggae chill'];
+
+const PILL_COLORS = [
+  { bg: 'bg-saffron/15', border: 'border-saffron', text: 'text-saffron', shadow: 'brutal-shadow-saffron' },
+  { bg: 'bg-blush/15', border: 'border-blush', text: 'text-blush', shadow: 'brutal-shadow-blush' },
+  { bg: 'bg-mint/15', border: 'border-mint', text: 'text-mint', shadow: 'brutal-shadow-mint' },
+  { bg: 'bg-saffron/15', border: 'border-saffron', text: 'text-saffron', shadow: 'brutal-shadow-saffron' },
+  { bg: 'bg-blush/15', border: 'border-blush', text: 'text-blush', shadow: 'brutal-shadow-blush' },
+  { bg: 'bg-mint/15', border: 'border-mint', text: 'text-mint', shadow: 'brutal-shadow-mint' },
+  { bg: 'bg-saffron/15', border: 'border-saffron', text: 'text-saffron', shadow: 'brutal-shadow-saffron' },
+  { bg: 'bg-blush/15', border: 'border-blush', text: 'text-blush', shadow: 'brutal-shadow-blush' },
 ];
 
 export function Home() {
-  const [activeCat, setActiveCat] = useState('pop');
+  const [searchParams, setSearchParams] = useSearchParams();
+  const query = searchParams.get('q') || '';
+  const debouncedQuery = useDebounce(query, 600);
+  const inputRef = useRef<HTMLInputElement>(null);
 
-  const { data: trending, isLoading: trendingLoading } = useQuery({
-    queryKey: ['yt-trending', activeCat],
-    queryFn: () => youtubeApi.trending(activeCat),
+  useEffect(() => {
+    const handleKey = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === 'k') { e.preventDefault(); inputRef.current?.focus(); }
+    };
+    window.addEventListener('keydown', handleKey);
+    return () => window.removeEventListener('keydown', handleKey);
+  }, []);
+
+  const { data, isLoading, isFetching } = useQuery({
+    queryKey: ['search', debouncedQuery],
+    queryFn: () => youtubeApi.search(debouncedQuery),
+    enabled: debouncedQuery.length > 0,
   });
 
-  const { data: homeData } = useQuery({
-    queryKey: ['home'],
-    queryFn: libraryApi.getHome,
-  });
-
-  const heroTracks = trending?.tracks?.slice(0, 3) || [];
+  const searching = isLoading || isFetching;
+  const hasQuery = query.length > 0;
 
   return (
-    <div className="p-10 space-y-20 max-w-6xl mx-auto">
-      {heroTracks.length > 0 && (
-        <section className="grid grid-cols-1 md:grid-cols-3 gap-5">
-          {heroTracks.map((track: any, i: number) => {
-            const colors = ['bg-brutal-yellow', 'bg-brutal-pink', 'bg-brutal-blue'];
-            const shadows = ['brutal-shadow-yellow', 'brutal-shadow-pink', 'brutal-shadow-blue'];
-            return (
-              <div
-                key={track.id}
-                className={`${colors[i]} brutal-border ${shadows[i]} p-8 cursor-pointer transition-all hover:-translate-x-1 hover:-translate-y-1 hover:shadow-[8px_8px_0px_#000] active:translate-x-1 active:translate-y-1`}
-                onClick={() => usePlayerStore.getState().play(track)}
-              >
-                <div className="flex items-start justify-between gap-4">
-                  <div className="flex-1 min-w-0">
-                    <span className="inline-block text-[10px] font-mono font-black uppercase tracking-widest px-3 py-1 brutal-border-thin text-xs mb-3 bg-white dark:bg-[#1a1a1a]">
-                      {i === 0 ? 'Hot Pick' : i === 1 ? 'Trending' : 'Fresh'}
-                    </span>
-                    <h3 className="text-xl font-black uppercase mt-1 leading-tight truncate">{track.title}</h3>
-                    <p className="text-sm font-mono mt-1.5 opacity-70 truncate">{track.artist_name}</p>
-                    <span className="inline-block mt-4 metadata-tag text-[9px] bg-black text-white border-black">
-                      &#9654; Play Now
-                    </span>
-                  </div>
-                  <div className="relative flex-shrink-0">
-                    <CD title={track.title} artist={track.artist_name} size="md" />
-                    <span className="absolute -top-2.5 -right-2.5 metadata-tag text-[8px] bg-brutal-red text-white border-white">YT</span>
-                  </div>
-                </div>
-              </div>
-            );
-          })}
-        </section>
-      )}
-
-      {/* Genre category pills */}
-      <section>
-        <div className="flex items-center gap-4 mb-8">
-          <span className="section-index text-sm font-bold opacity-40">01</span>
-          <h2 className="text-3xl font-black uppercase tracking-tight">Browse Music</h2>
-          <span className="h-px flex-1 bg-black/20 dark:bg-white/20" />
-        </div>
-        <div className="flex flex-wrap gap-3">
-          {CATEGORIES.map((cat) => (
-            <button
-              key={cat.id}
-              onClick={() => setActiveCat(cat.id)}
-              className={`${cat.color} brutal-border ${cat.shadow} px-6 py-4 font-black uppercase text-sm transition-all hover:-translate-x-1 hover:-translate-y-1 active:translate-x-1 active:translate-y-1 ${
-                activeCat === cat.id ? 'ring-3 ring-black scale-105 z-10' : ''
-              }`}
-            >
-              {cat.label}
-            </button>
-          ))}
-        </div>
-      </section>
-
-      {/* Trending Now */}
-      <section>
-        <div className="flex items-center gap-4 mb-8">
-          <span className="section-index text-sm font-bold opacity-40">02</span>
-          <h2 className="text-3xl font-black uppercase tracking-tight">
-            <span className="text-brutal-red">&#9679;</span> Trending Now
-          </h2>
-          <span className="metadata-tag text-[9px]">{activeCat.toUpperCase()}</span>
-          <span className="h-px flex-1 bg-black/20 dark:bg-white/20" />
-        </div>
-        {trendingLoading ? (
-          <div className="flex items-center gap-3 py-8">
-            <span className="w-5 h-5 brutal-border-thin animate-spin border-t-transparent" />
-            <p className="font-mono text-sm opacity-50">Loading trending tracks...</p>
+    <div className="min-h-screen flex flex-col items-center px-4 sm:px-6 pt-20 sm:pt-28 pb-24">
+      <div className={`w-full flex flex-col items-center ${hasQuery ? 'max-w-7xl' : 'max-w-xl'}`}>
+        <div className="w-full flex flex-col items-center max-w-xl">
+          <div className="mb-10 sm:mb-14 text-center">
+            <h1 className="font-display text-6xl sm:text-8xl md:text-9xl font-extrabold tracking-[-0.04em] leading-none hover:tracking-[-0.02em] transition-all duration-500">
+              <span className="text-saffron">F</span>
+              <span className="text-blush">E</span>
+              <span className="text-mint">O</span>
+              <span className="text-foreground">.</span>
+            </h1>
+            <p className="mt-3 font-mono text-[10px] sm:text-xs tracking-[0.3em] text-foreground/25 uppercase">Henoy ara</p>
           </div>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-            {trending?.tracks?.slice(0, 12).map((track: any, i: number) => (
-              <TrackCard key={track.id} track={track} index={i} />
-            ))}
+
+          <div className="relative w-full mb-8">
+            <Search className="absolute left-5 top-1/2 -translate-y-1/2 size-5 text-foreground/20 pointer-events-none" />
+            <input
+              ref={inputRef}
+              type="text"
+              value={query}
+              onChange={(e) => setSearchParams(e.target.value ? { q: e.target.value } : {}, { replace: true })}
+              placeholder="Search millions of songs..."
+              className="w-full rounded-full border-2 border-border bg-muted/10 pl-14 pr-14 py-3.5 sm:py-4 text-base sm:text-lg font-display font-bold tracking-tight placeholder:text-foreground/20 text-foreground outline-none focus:border-saffron focus:bg-muted/20 focus:brutal-shadow-saffron transition-all"
+            />
+            <span className="absolute right-5 top-1/2 -translate-y-1/2 text-[9px] font-mono text-foreground/20 pointer-events-none hidden sm:block bg-muted/30 px-2 py-1 rounded-full border border-border">&#8984;K</span>
+          </div>
+
+          {!hasQuery && !searching && (
+            <>
+              <p className="font-mono text-[10px] text-foreground/30 uppercase tracking-[0.2em] mb-5">Try searching</p>
+              <div className="flex flex-wrap justify-center gap-2.5 max-w-lg">
+                {SUGGESTIONS.map((s, i) => {
+                  const c = PILL_COLORS[i];
+                  return (
+                    <button
+                      key={s}
+                      onClick={() => setSearchParams({ q: s }, { replace: true })}
+                      className={`rounded-full border-2 ${c.border} ${c.bg} ${c.text} px-5 py-2.5 sm:px-6 sm:py-3 text-xs font-mono font-semibold transition-all active:translate-y-[2px] ${c.shadow} hover:opacity-80 ${
+                        i % 3 === 0 ? '-rotate-1' : i % 3 === 1 ? 'rotate-1' : ''
+                      }`}
+                    >
+                      {s}
+                    </button>
+                  );
+                })}
+              </div>
+            </>
+          )}
+        </div>
+
+        {searching && (
+          <div className="flex items-center gap-3 py-12">
+            <span className="size-10 rounded-full border-2 border-border flex items-center justify-center brutal-shadow-sm animate-pulse">
+              <span className="size-4 border-2 border-saffron border-t-transparent rounded-full animate-spin" />
+            </span>
+            <p className="font-mono text-sm text-foreground/50">Searching worldwide...</p>
           </div>
         )}
-      </section>
 
-      {/* Recently Played */}
-      {homeData?.recentlyPlayed?.length > 0 && (
-        <section>
-          <div className="flex items-center gap-4 mb-8">
-            <span className="section-index text-sm font-bold opacity-40">03</span>
-            <h2 className="text-3xl font-black uppercase tracking-tight">Recently Played</h2>
-            <span className="h-px flex-1 bg-black/20 dark:bg-white/20" />
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-            {homeData.recentlyPlayed.slice(0, 8).map((track: any, i: number) => (
-              <TrackCard key={track.id} track={track} index={i} />
-            ))}
-          </div>
-        </section>
-      )}
-
-      {/* Featured Playlists */}
-      {homeData?.featuredPlaylists?.length > 0 && (
-        <section>
-          <div className="flex items-center gap-4 mb-8">
-            <span className="section-index text-sm font-bold opacity-40">04</span>
-            <h2 className="text-3xl font-black uppercase tracking-tight">Featured Playlists</h2>
-            <span className="h-px flex-1 bg-black/20 dark:bg-white/20" />
-          </div>
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-            {homeData.featuredPlaylists.map((pl: any) => (
-              <a
-                key={pl.id}
-                href={`/playlists/${pl.id}`}
-                className="brutal-card p-5 block transition-all hover:-translate-x-1 hover:-translate-y-1"
-              >
-                <div className="w-full aspect-square brutal-border-thin mb-4 flex items-center justify-center bg-brutal-yellow text-3xl font-black">
-                  &#9834;
+        {data?.tracks?.length > 0 && (
+          <div className="w-full mt-4 animate-fadeIn">
+            <div className="flex items-center gap-3 mb-6">
+              <span className="section-number brutal-shadow-sm">01</span>
+              <h2 className="font-display text-xl font-extrabold tracking-[-0.02em]">Results</h2>
+              <span className="chip text-[8px] bg-saffron/15 text-saffron border-saffron">{data.tracks.length} tracks</span>
+              <span className="h-0.5 flex-1 rounded-full bg-gradient-to-r from-saffron via-blush to-mint" />
+            </div>
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 sm:gap-4">
+              {data.tracks.map((track: any, i: number) => (
+                <div key={track.id} className="animate-fadeIn" style={{ animationDelay: `${i * 50}ms` }}>
+                  <TrackCard track={track} index={i} />
                 </div>
-                <p className="font-black text-sm uppercase truncate leading-tight">{pl.name}</p>
-                <p className="text-xs font-mono opacity-40 mt-1.5">{pl.tracks_count || 0} tracks</p>
-              </a>
-            ))}
+              ))}
+            </div>
           </div>
-        </section>
-      )}
+        )}
+
+        {!searching && hasQuery && data?.tracks?.length === 0 && (
+          <div className="rounded-2xl border-2 border-foreground bg-saffron text-black p-10 sm:p-12 text-center max-w-md mx-auto -rotate-1 mt-10 brutal-shadow-ink">
+            <p className="font-display text-2xl sm:text-3xl font-extrabold">No Results</p>
+            <p className="text-xs sm:text-sm font-mono mt-4 text-black/70">Try a different search term or check your spelling</p>
+            <div className="mt-6 h-1 w-12 bg-black mx-auto rounded-full" />
+          </div>
+        )}
+      </div>
     </div>
   );
 }

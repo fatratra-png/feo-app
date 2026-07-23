@@ -1,14 +1,23 @@
 import { Outlet } from 'react-router-dom';
-import { Sidebar } from './Sidebar';
 import { PlayerBar } from '../player/PlayerBar';
+import { PlayerPanel } from '../player/PlayerPanel';
+import { useKeyboard } from '../../hooks/useKeyboard';
+import { usePlayerStore } from '../../stores/playerStore';
 
 export function Layout() {
+  useKeyboard();
+  const currentTrack = usePlayerStore((s) => s.currentTrack);
+  const panelOpen = !!currentTrack;
+
   return (
-    <div className="flex min-h-screen">
-      <Sidebar />
-      <main className="ml-72 flex-1 pb-28">
+    <div className="min-h-screen bg-background flex">
+      <main
+        className="flex-1 min-w-0 transition-all duration-500 ease-out"
+        style={{ marginRight: panelOpen ? '420px' : '0' }}
+      >
         <Outlet />
       </main>
+      <PlayerPanel />
       <PlayerBar />
     </div>
   );

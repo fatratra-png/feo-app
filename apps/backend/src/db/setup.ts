@@ -55,6 +55,10 @@ async function setupDatabase() {
       track_number INTEGER NOT NULL DEFAULT 1,
       artist_id UUID REFERENCES artists(id) ON DELETE CASCADE,
       album_id UUID REFERENCES albums(id) ON DELETE CASCADE,
+      genre VARCHAR(100) DEFAULT '',
+      tags TEXT[] DEFAULT '{}',
+      mood VARCHAR(100) DEFAULT '',
+      tempo INTEGER DEFAULT 0,
       plays_count INTEGER DEFAULT 0,
       created_at TIMESTAMPTZ DEFAULT NOW()
     );
