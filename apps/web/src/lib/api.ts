@@ -105,6 +105,7 @@ export const searchApi = {
 export const youtubeApi = {
   search: (q: string) => api(`/youtube/search?q=${encodeURIComponent(q)}`),
   trending: (cat?: string) => api(`/youtube/trending${cat ? `?cat=${encodeURIComponent(cat)}` : ''}`),
+  related: (q: string) => api(`/youtube/related?q=${encodeURIComponent(q)}`),
   categories: () => api('/youtube/categories'),
   getAudioUrl: (youtubeId: string) => api(`/youtube/play/${youtubeId}`),
   getDetails: (youtubeId: string) => api(`/youtube/details/${youtubeId}`),

@@ -5,8 +5,9 @@ import { formatDuration } from '../../lib/utils';
 export function PlayerBar() {
   const {
     currentTrack, isPlaying, volume, progress, queue, queueIndex,
-    pause, next, previous, isLoadingAudio,
+    pause, next, previous, replay, isLoadingAudio, repeat, autoPlay,
     setVolume, setProgress, removeFromQueue, clearQueue,
+    cycleRepeat, toggleAutoPlay,
   } = usePlayerStore();
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const [expanded, setExpanded] = useState(false);
@@ -65,6 +66,9 @@ export function PlayerBar() {
 
   const progressPct = currentTrack.duration > 0 ? (progress / currentTrack.duration) * 100 : 0;
 
+  const repeatIcon = repeat === 'one' ? '1' : repeat === 'all' ? '\u21BB' : '\u21BB';
+  const repeatTitle = repeat === 'off' ? 'Repeat off' : repeat === 'one' ? 'Repeat one' : 'Repeat all';
+
   return (
     <>
       <div className={`fixed bottom-0 left-0 right-0 brutal-border bg-[#1e1e1e] z-50 transition-all ${expanded ? 'pb-6' : ''}`}>
@@ -82,9 +86,7 @@ export function PlayerBar() {
                 )}
               </div>
             ) : (
-              <div className="w-14 h-14 brutal-border-thin bg-brutal-yellow flex items-center justify-center text-xl font-black flex-shrink-0">
-                &#9834;
-              </div>
+              <div className="w-14 h-14 brutal-border-thin bg-brutal-yellow flex items-center justify-center text-xl font-black flex-shrink-0">&#9834;</div>
             )}
             <div className="min-w-0 flex-1">
               <p className="font-black text-base uppercase truncate leading-tight">{currentTrack.title}</p>
@@ -93,9 +95,19 @@ export function PlayerBar() {
           </div>
 
           <div className="flex-1 flex flex-col items-center gap-1">
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-2">
+              <button
+                onClick={cycleRepeat}
+                className={`w-7 h-7 flex items-center justify-center text-xs font-mono brutal-border-thin transition-all hover:bg-brutal-yellow hover:text-black ${repeat !== 'off' ? 'bg-brutal-yellow/20 text-brutal-yellow' : 'opacity-50'}`}
+                title={repeatTitle}
+              >
+                {repeat === 'one' ? '1' : '\u21BB'}
+              </button>
               <button onClick={previous} className="w-8 h-8 flex items-center justify-center brutal-border-thin text-sm opacity-60 hover:opacity-100 hover:bg-brutal-yellow hover:text-black transition-all">
                 &#9646;&#9644;
+              </button>
+              <button onClick={replay} className="w-7 h-7 flex items-center justify-center text-xs brutal-border-thin opacity-40 hover:opacity-100 hover:bg-brutal-yellow hover:text-black transition-all" title="Replay">
+                &#8634;
               </button>
               <button
                 onClick={() => (isPlaying ? pause() : resume())}
@@ -112,6 +124,13 @@ export function PlayerBar() {
               </button>
               <button onClick={next} className="w-8 h-8 flex items-center justify-center brutal-border-thin text-sm opacity-60 hover:opacity-100 hover:bg-brutal-yellow hover:text-black transition-all">
                 &#9644;&#9646;
+              </button>
+              <button
+                onClick={toggleAutoPlay}
+                className={`w-7 h-7 flex items-center justify-center text-xs font-mono brutal-border-thin transition-all hover:bg-brutal-yellow hover:text-black ${autoPlay ? 'bg-brutal-green/20 text-brutal-green' : 'opacity-50'}`}
+                title={autoPlay ? 'Auto-play on' : 'Auto-play off'}
+              >
+                &#9835;
               </button>
             </div>
             <div className="flex items-center gap-3 w-full max-w-lg">
@@ -146,9 +165,13 @@ export function PlayerBar() {
                 )}
                 <p className="font-black uppercase text-xl leading-tight">{currentTrack.title}</p>
                 <p className="text-sm font-mono opacity-50 mt-1">{currentTrack.artist_name}</p>
-                {currentTrack.source === 'youtube' && (
-                  <span className="mt-3 metadata-tag text-[9px] bg-brutal-red text-white border-white inline-block">YouTube Stream</span>
-                )}
+                <div className="flex gap-2 mt-4">
+                  {currentTrack.source === 'youtube' && (
+                    <span className="metadata-tag text-[9px] bg-brutal-red text-white border-white">YouTube</span>
+                  )}
+                  {autoPlay && <span className="metadata-tag text-[9px] bg-brutal-green text-black border-black">Auto</span>}
+                  {repeat !== 'off' && <span className="metadata-tag text-[9px] bg-brutal-yellow text-black border-black">{repeat === 'one' ? 'Repeat 1' : 'Repeat All'}</span>}
+                </div>
               </div>
 
               <div className="flex-1 min-w-0">
@@ -158,9 +181,7 @@ export function PlayerBar() {
                     <span className="ml-3 metadata-tag text-[9px]">{queue.length} tracks</span>
                   </h3>
                   {queue.length > 0 && (
-                    <button onClick={clearQueue} className="metadata-tag text-[9px] cursor-pointer hover:bg-brutal-red hover:text-white transition-colors">
-                      Clear all
-                    </button>
+                    <button onClick={clearQueue} className="metadata-tag text-[9px] cursor-pointer hover:bg-brutal-red hover:text-white transition-colors">Clear all</button>
                   )}
                 </div>
                 <div className="space-y-2 max-h-72 overflow-y-auto pr-2">
@@ -176,13 +197,13 @@ export function PlayerBar() {
                         <p className="font-bold uppercase text-xs truncate">{track.title}</p>
                         <p className="text-[10px] font-mono opacity-50 mt-0.5 truncate">{track.artist_name}</p>
                       </div>
-                      <button onClick={() => removeFromQueue(track.id)} className="w-6 h-6 flex items-center justify-center text-xs brutal-border-thin opacity-30 hover:opacity-100 hover:bg-brutal-red hover:text-white transition-all flex-shrink-0">
-                        &#10005;
-                      </button>
+                      <button onClick={() => removeFromQueue(track.id)} className="w-6 h-6 flex items-center justify-center text-xs brutal-border-thin opacity-30 hover:opacity-100 hover:bg-brutal-red hover:text-white transition-all flex-shrink-0">&#10005;</button>
                     </div>
                   ))}
                   {queue.length === 0 && (
-                    <p className="text-sm font-mono opacity-30 py-8 text-center">queue is empty</p>
+                    <p className="text-sm font-mono opacity-30 py-8 text-center">
+                      {autoPlay ? 'Auto-play is on \u2014 similar tracks will play next' : 'Queue is empty'}
+                    </p>
                   )}
                 </div>
               </div>

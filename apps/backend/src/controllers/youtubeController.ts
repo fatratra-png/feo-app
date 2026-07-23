@@ -1,14 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import { youtubeService } from '../services/youtubeService';
 
-const TRENDING_QUERIES = [
-  'trending music 2024',
-  'top hits 2024',
-  'new popular songs',
-  'viral music',
-  'pop hits worldwide',
-];
-
 export const youtubeController = {
   search(req: Request, res: Response, next: NextFunction) {
     try {
@@ -18,9 +10,7 @@ export const youtubeController = {
       }
       const tracks = youtubeService.search(q);
       res.json({ tracks });
-    } catch (err) {
-      next(err);
-    }
+    } catch (err) { next(err); }
   },
 
   trending(req: Request, res: Response, next: NextFunction) {
@@ -29,9 +19,18 @@ export const youtubeController = {
       const query = category || 'trending music';
       const tracks = youtubeService.search(query, 12);
       res.json({ tracks, category });
-    } catch (err) {
-      next(err);
-    }
+    } catch (err) { next(err); }
+  },
+
+  related(req: Request, res: Response, next: NextFunction) {
+    try {
+      const q = req.query.q as string;
+      if (!q || q.trim().length === 0) {
+        return res.json({ tracks: [] });
+      }
+      const tracks = youtubeService.related(q, 12);
+      res.json({ tracks });
+    } catch (err) { next(err); }
   },
 
   categories(_req: Request, res: Response) {
@@ -55,25 +54,17 @@ export const youtubeController = {
     try {
       const { youtubeId } = req.params;
       const audioUrl = youtubeService.getAudioUrl(youtubeId);
-      if (!audioUrl) {
-        return res.status(404).json({ message: 'Could not extract audio URL' });
-      }
+      if (!audioUrl) return res.status(404).json({ message: 'Could not extract audio URL' });
       res.json({ audioUrl, youtubeId });
-    } catch (err) {
-      next(err);
-    }
+    } catch (err) { next(err); }
   },
 
   async getDetails(req: Request, res: Response, next: NextFunction) {
     try {
       const { youtubeId } = req.params;
       const details = youtubeService.getDetails(youtubeId);
-      if (!details) {
-        return res.status(404).json({ message: 'Video not found' });
-      }
+      if (!details) return res.status(404).json({ message: 'Video not found' });
       res.json(details);
-    } catch (err) {
-      next(err);
-    }
+    } catch (err) { next(err); }
   },
 };
