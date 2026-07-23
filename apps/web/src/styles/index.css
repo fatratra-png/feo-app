@@ -123,8 +123,8 @@ body {
 }
 
 .dot-grid {
-  background-image: radial-gradient(#333 0.7px, transparent 0.7px);
-  background-size: 28px 28px;
+  background-image: radial-gradient(#333 1px, transparent 1px);
+  background-size: 32px 32px;
 }
 
 .section-number {
@@ -193,6 +193,6 @@ body {
 .light .brutal-slider { background: #d8d0c0; }
 .light .chip { background: #f0e8d8; border-color: #000; color: #555; }
 .light .sticker { background: #f0e8d8; border-color: #000; color: #555; }
-.light .dot-grid { background-image: radial-gradient(#bbb 0.7px, transparent 0.7px); }
+.light .dot-grid { background-image: radial-gradient(#bbb 1px, transparent 1px); background-size: 32px 32px; }
 .light .brutal-shadow-sm { box-shadow: 2px 2px 0 0 #000; }
 .light .brutal-skeleton { background: linear-gradient(90deg, #e8e0d0 25%, #d8d0c0 50%, #e8e0d0 75%); background-size: 200% 100%; }
