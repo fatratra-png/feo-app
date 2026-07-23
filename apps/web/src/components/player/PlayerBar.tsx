@@ -1,6 +1,7 @@
 import { useRef, useEffect, useState } from 'react';
 import { usePlayerStore } from '../../stores/playerStore';
 import { formatDuration } from '../../lib/utils';
+import { CD } from '../ui/CD';
 
 export function PlayerBar() {
   const {
@@ -78,16 +79,12 @@ export function PlayerBar() {
 
         <div className="px-6 py-3 flex items-center gap-6 max-w-6xl mx-auto relative">
           <div className="flex items-center gap-4 w-80 min-w-0 cursor-pointer" onClick={() => setExpanded(!expanded)}>
-            {currentTrack.album_cover_url ? (
-              <div className="relative flex-shrink-0">
-                <img src={currentTrack.album_cover_url} alt="" className="w-14 h-14 brutal-border-thin object-cover" />
-                {currentTrack.source === 'youtube' && (
-                  <span className="absolute -top-2 -right-2 metadata-tag text-[7px] px-1.5 py-0.5 bg-brutal-red text-white border-white leading-none">YT</span>
-                )}
-              </div>
-            ) : (
-              <div className="w-14 h-14 brutal-border-thin bg-brutal-yellow flex items-center justify-center text-xl font-black flex-shrink-0">&#9834;</div>
-            )}
+            <div className="relative flex-shrink-0">
+              <CD title={currentTrack.title} artist={currentTrack.artist_name} size="sm" />
+              {currentTrack.source === 'youtube' && (
+                <span className="absolute -top-2 -right-2 metadata-tag text-[7px] px-1.5 py-0.5 bg-brutal-red text-white border-white leading-none">YT</span>
+              )}
+            </div>
             <div className="min-w-0 flex-1">
               <p className="font-black text-base uppercase truncate leading-tight">{currentTrack.title}</p>
               <p className="text-xs font-mono opacity-40 mt-1 truncate">{currentTrack.artist_name}</p>
@@ -158,11 +155,7 @@ export function PlayerBar() {
           <div className="border-t-3 border-[#333] px-6 pt-6 pb-2 max-w-6xl mx-auto">
             <div className="flex gap-10">
               <div className="flex-shrink-0 w-56">
-                {currentTrack.album_cover_url ? (
-                  <img src={currentTrack.album_cover_url} alt="" className="w-full aspect-square brutal-border object-cover mb-4" />
-                ) : (
-                  <div className="w-full aspect-square brutal-border bg-brutal-yellow flex items-center justify-center text-5xl font-black mb-4">&#9834;</div>
-                )}
+                <CD title={currentTrack.title} artist={currentTrack.artist_name} size="lg" className="mb-4 mx-auto" />
                 <p className="font-black uppercase text-xl leading-tight">{currentTrack.title}</p>
                 <p className="text-sm font-mono opacity-50 mt-1">{currentTrack.artist_name}</p>
                 <div className="flex gap-2 mt-4">
@@ -188,11 +181,7 @@ export function PlayerBar() {
                   {queue.map((track, i) => (
                     <div key={track.id} className={`flex items-center gap-3 p-3 brutal-border-thin text-sm queue-enter ${i === queueIndex ? 'bg-brutal-yellow text-black' : 'bg-[#2a2a2a]'}`}>
                       <span className="font-mono opacity-30 w-5 flex-shrink-0 text-xs">{i + 1}</span>
-                      {track.album_cover_url ? (
-                        <img src={track.album_cover_url} alt="" className="w-10 h-10 brutal-border-thin object-cover flex-shrink-0" />
-                      ) : (
-                        <div className="w-10 h-10 brutal-border-thin bg-brutal-yellow flex items-center justify-center text-sm font-black flex-shrink-0">&#9834;</div>
-                      )}
+                      <CD title={track.title} artist={track.artist_name} size="sm" />
                       <div className="flex-1 min-w-0">
                         <p className="font-bold uppercase text-xs truncate">{track.title}</p>
                         <p className="text-[10px] font-mono opacity-50 mt-0.5 truncate">{track.artist_name}</p>

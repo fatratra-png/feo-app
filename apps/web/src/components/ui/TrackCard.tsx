@@ -1,5 +1,6 @@
 import { formatDuration } from '../../lib/utils';
 import { usePlayerStore } from '../../stores/playerStore';
+import { CD } from './CD';
 
 interface TrackCardProps {
   track: {
@@ -33,13 +34,7 @@ export function TrackCard({ track, index }: TrackCardProps) {
         </span>
       )}
       <div className="relative flex-shrink-0">
-        {track.album_cover_url ? (
-          <img src={track.album_cover_url} alt="" className="w-14 h-14 brutal-border-thin object-cover" />
-        ) : (
-          <div className="w-14 h-14 brutal-border-thin bg-brutal-yellow flex items-center justify-center text-lg font-black">
-            &#9834;
-          </div>
-        )}
+        <CD title={track.title} artist={track.artist_name} size="sm" />
         {isYoutube && (
           <span className="absolute -top-2 -right-2 metadata-tag text-[7px] px-1.5 py-0.5 bg-brutal-red text-white border-white leading-none">
             YT

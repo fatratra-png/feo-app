@@ -1,4 +1,5 @@
 import { execSync } from 'child_process';
+import { cleanTitle, extractMetadata, detectGenre, relatedSearchQuery } from './metadataCleaner';
 
 interface YouTubeTrack {
   id: string;
@@ -23,11 +24,16 @@ function parseLine(line: string): YouTubeTrack | null {
     const data = JSON.parse(line);
     const duration = parseDuration(data.duration || 0);
     const thumbnail = data.thumbnail || data.thumbnails?.[0]?.url || `https://i.ytimg.com/vi/${data.id}/hqdefault.jpg`;
+    const channelName = data.channel || data.uploader || data.channel_id || 'YouTube';
+    const rawTitle = data.title || 'Unknown';
+
+    const { title, artist } = extractMetadata(rawTitle, channelName);
+
     return {
       id: `yt__${data.id}`,
-      title: data.title || 'Unknown',
+      title,
       duration,
-      artist_name: data.channel || data.uploader || data.channel_id || 'YouTube',
+      artist_name: artist,
       album_title: data.album || data.playlist_title || 'YouTube',
       album_cover_url: thumbnail,
       file_url: null,
@@ -38,27 +44,32 @@ function parseLine(line: string): YouTubeTrack | null {
   } catch { return null; }
 }
 
+function ytSearch(query: string, maxResults: number): YouTubeTrack[] {
+  const cmd = `yt-dlp --dump-json --no-warnings --flat-playlist "ytsearch${maxResults}:${query.replace(/"/g, '\\"')}" 2>/dev/null`;
+  const output = execSync(cmd, { timeout: 15000, encoding: 'utf-8', maxBuffer: 10 * 1024 * 1024 });
+  return output.trim().split('\n').filter(Boolean).map(parseLine).filter(Boolean) as YouTubeTrack[];
+}
+
 export const youtubeService = {
-  search(query: string, maxResults = 15): YouTubeTrack[] {
+  search(query: string, maxResults = 20): YouTubeTrack[] {
     try {
-      const cmd = `yt-dlp --dump-json --no-warnings --flat-playlist "ytsearch${maxResults}:${query.replace(/"/g, '\\"')}" 2>/dev/null`;
-      const output = execSync(cmd, { timeout: 15000, encoding: 'utf-8', maxBuffer: 10 * 1024 * 1024 });
-      const lines = output.trim().split('\n').filter(Boolean);
-      const tracks = lines.map(parseLine).filter(Boolean) as YouTubeTrack[];
+      const tracks = ytSearch(query, maxResults);
+      if (tracks.length > 0) return tracks;
 
-      if (tracks.length === 0 && query.trim().length > 0) {
-        const fallback = this.search(query.split(' ').slice(0, 2).join(' '), maxResults);
-        return fallback.length > 0 ? fallback : this.search('popular music', maxResults);
+      const tokens = query.split(' ').filter((t) => t.length > 0);
+      if (tokens.length > 1) {
+        const shorter = tokens.slice(0, Math.max(2, tokens.length - 1)).join(' ');
+        const retry = ytSearch(shorter, maxResults);
+        if (retry.length > 0) return retry;
+      }
+      if (tokens.length > 2) {
+        const retry2 = ytSearch(tokens.slice(0, 2).join(' '), maxResults);
+        if (retry2.length > 0) return retry2;
       }
 
-      return tracks;
+      return ytSearch('popular music', maxResults);
     } catch (err) {
-      if (query.trim().length > 0) {
-        try {
-          return this.search('trending music', maxResults);
-        } catch { return []; }
-      }
-      return [];
+      try { return ytSearch('trending music', maxResults); } catch { return []; }
     }
   },
 
@@ -86,11 +97,25 @@ export const youtubeService = {
     }
   },
 
-  related(query: string, maxResults = 12): YouTubeTrack[] {
+  related(query: string, _maxResults = 12): YouTubeTrack[] {
     try {
-      const tokens = query.split(' ').filter(t => t.length > 0);
-      const searchQuery = tokens.slice(0, 5).join(' ') + ' music';
-      return this.search(searchQuery, maxResults);
+      const tokens = query.split(' ').filter((t) => t.length > 0);
+
+      const potentialArtist = tokens.slice(0, 2).join(' ');
+      const potentialTitle = tokens.slice(2).join(' ');
+      const genre = detectGenre(potentialTitle || query, potentialArtist);
+
+      const searchQuery = relatedSearchQuery(potentialTitle || query, potentialArtist, genre);
+      const tracks = ytSearch(searchQuery, 12);
+
+      if (tracks.length > 8) return tracks;
+
+      if (tokens.length > 2) {
+        const fallback = ytSearch(tokens.slice(0, 3).join(' ') + ' music', 12);
+        if (fallback.length > tracks.length) return fallback;
+      }
+
+      return tracks;
     } catch {
       return [];
     }

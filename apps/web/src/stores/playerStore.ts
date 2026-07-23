@@ -126,7 +126,7 @@ export const usePlayerStore = create<PlayerState>((set, get) => ({
       } else if (autoPlay && currentTrack) {
         const query = `${currentTrack.title} ${currentTrack.artist_name}`;
         set({ isLoadingAudio: true });
-        fetch(`/api/youtube/related?q=${encodeURIComponent(query)}`)
+        fetch(`/api/youtube/related?q=${encodeURIComponent(query)}&title=${encodeURIComponent(currentTrack.title)}&artist=${encodeURIComponent(currentTrack.artist_name)}`)
           .then((r) => r.json())
           .then((data) => {
             const tracks = data.tracks || [];

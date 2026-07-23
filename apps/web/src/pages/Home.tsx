@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { youtubeApi, libraryApi } from '../lib/api';
 import { TrackCard } from '../components/ui/TrackCard';
+import { CD } from '../components/ui/CD';
 import { usePlayerStore } from '../stores/playerStore';
 
 const CATEGORIES = [
@@ -56,12 +57,10 @@ export function Home() {
                       &#9654; Play Now
                     </span>
                   </div>
-                  {track.album_cover_url && (
-                    <div className="relative flex-shrink-0">
-                      <img src={track.album_cover_url} alt="" className="w-24 h-24 brutal-border-thin object-cover" />
-                      <span className="absolute -top-2.5 -right-2.5 metadata-tag text-[8px] bg-brutal-red text-white border-white">YT</span>
-                    </div>
-                  )}
+                  <div className="relative flex-shrink-0">
+                    <CD title={track.title} artist={track.artist_name} size="md" />
+                    <span className="absolute -top-2.5 -right-2.5 metadata-tag text-[8px] bg-brutal-red text-white border-white">YT</span>
+                  </div>
                 </div>
               </div>
             );

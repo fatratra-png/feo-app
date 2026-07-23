@@ -24,11 +24,12 @@ export const youtubeController = {
 
   related(req: Request, res: Response, next: NextFunction) {
     try {
+      const title = req.query.title as string;
+      const artist = req.query.artist as string;
       const q = req.query.q as string;
-      if (!q || q.trim().length === 0) {
-        return res.json({ tracks: [] });
-      }
-      const tracks = youtubeService.related(q, 12);
+      const searchQuery = (title && artist) ? `${title} ${artist}` : (q || '');
+      if (!searchQuery.trim()) return res.json({ tracks: [] });
+      const tracks = youtubeService.related(searchQuery, 12);
       res.json({ tracks });
     } catch (err) { next(err); }
   },
