@@ -6,7 +6,7 @@ interface ThemeState {
 }
 
 export const useThemeStore = create<ThemeState>((set) => ({
-  isDark: localStorage.getItem('feo_theme') === 'dark',
+  isDark: localStorage.getItem('feo_theme') !== 'light',
   toggle: () =>
     set((state) => {
       const newTheme = !state.isDark;

@@ -12,43 +12,43 @@ export function Sidebar() {
   const { isDark, toggle } = useThemeStore();
 
   return (
-    <aside className="w-64 h-screen fixed left-0 top-0 brutal-border bg-white dark:bg-[#1a1a1a] z-40 flex flex-col">
-      <div className="p-6 border-b-3 border-black dark:border-[#444]">
-        <h1 className="text-3xl font-black tracking-tighter">
+    <aside className="w-72 h-screen fixed left-0 top-0 brutal-border bg-[#1e1e1e] z-40 flex flex-col">
+      <div className="p-8 border-b-3 border-[#333]">
+        <h1 className="text-4xl font-black tracking-tighter">
           <span className="text-brutal-yellow">F</span>
           <span className="text-brutal-pink">E</span>
           <span className="text-brutal-blue">O</span>
           <span className="text-brutal-red">.</span>
         </h1>
-        <p className="text-xs font-mono mt-1 opacity-50">Henoy ara</p>
+        <p className="text-xs font-mono mt-2 opacity-40">Henoy ara</p>
       </div>
 
-      <nav className="flex-1 p-4 space-y-1">
+      <nav className="flex-1 p-5 space-y-1.5">
         {links.map((link) => (
           <NavLink
             key={link.to}
             to={link.to}
             end={link.to === '/'}
             className={({ isActive }) =>
-              `flex items-center gap-3 px-4 py-3 brutal-border-thin text-sm font-bold uppercase transition-all ${
+              `flex items-center gap-4 px-5 py-4 brutal-border-thin text-sm font-black uppercase tracking-wide transition-all ${
                 isActive
                   ? 'bg-brutal-yellow text-black'
-                  : 'bg-transparent hover:bg-gray-100 dark:hover:bg-[#333]'
+                  : 'bg-transparent hover:bg-[#333]'
               }`
             }
           >
-            <span className="text-lg">{link.icon}</span>
+            <span className="text-xl">{link.icon}</span>
             {link.label}
           </NavLink>
         ))}
       </nav>
 
-      <div className="p-4 border-t-3 border-black dark:border-[#444] space-y-2">
+      <div className="p-5 border-t-3 border-[#333] space-y-3">
         <button
           onClick={toggle}
-          className="w-full brutal-btn px-4 py-2 text-xs font-bold bg-white dark:bg-[#333]"
+          className="w-full brutal-btn px-5 py-3 text-xs font-black tracking-wider"
         >
-          {isDark ? '☀ Light' : '☾ Dark'}
+          {isDark ? '☀ Switch to Light' : '☾ Switch to Dark'}
         </button>
       </div>
     </aside>

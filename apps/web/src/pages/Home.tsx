@@ -23,7 +23,6 @@ export function Home() {
   const { data: trending, isLoading: trendingLoading } = useQuery({
     queryKey: ['yt-trending', activeCat],
     queryFn: () => youtubeApi.trending(activeCat),
-    enabled: !!activeCat,
   });
 
   const { data: homeData } = useQuery({
@@ -31,41 +30,36 @@ export function Home() {
     queryFn: libraryApi.getHome,
   });
 
-  const { data: ytSearch } = useQuery({
-    queryKey: ['yt-hero', activeCat],
-    queryFn: () => youtubeApi.search(activeCat === 'pop' ? 'popular music 2024' : `${activeCat} music mix`),
-  });
-
-  const heroTracks = ytSearch?.tracks?.slice(0, 3) || [];
+  const heroTracks = trending?.tracks?.slice(0, 3) || [];
 
   return (
-    <div className="p-8 space-y-10">
+    <div className="p-10 space-y-20 max-w-6xl mx-auto">
       {heroTracks.length > 0 && (
-        <section className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <section className="grid grid-cols-1 md:grid-cols-3 gap-5">
           {heroTracks.map((track: any, i: number) => {
             const colors = ['bg-brutal-yellow', 'bg-brutal-pink', 'bg-brutal-blue'];
             const shadows = ['brutal-shadow-yellow', 'brutal-shadow-pink', 'brutal-shadow-blue'];
             return (
               <div
                 key={track.id}
-                className={`${colors[i]} brutal-border ${shadows[i]} p-6 cursor-pointer transition-transform hover:-translate-x-0.5 hover:-translate-y-0.5 active:translate-x-0.5 active:translate-y-0.5`}
+                className={`${colors[i]} brutal-border ${shadows[i]} p-8 cursor-pointer transition-all hover:-translate-x-1 hover:-translate-y-1 hover:shadow-[8px_8px_0px_#000] active:translate-x-1 active:translate-y-1`}
                 onClick={() => usePlayerStore.getState().play(track)}
               >
-                <div className="flex items-start justify-between">
+                <div className="flex items-start justify-between gap-4">
                   <div className="flex-1 min-w-0">
-                    <span className="text-[10px] font-mono font-bold uppercase tracking-widest opacity-60">
-                      {i === 0 ? 'Hot Pick' : i === 1 ? 'Trending' : 'New'}
+                    <span className="inline-block text-[10px] font-mono font-black uppercase tracking-widest px-3 py-1 brutal-border-thin text-xs mb-3 bg-white dark:bg-[#1a1a1a]">
+                      {i === 0 ? 'Hot Pick' : i === 1 ? 'Trending' : 'Fresh'}
                     </span>
-                    <h3 className="text-xl font-black uppercase mt-2 leading-tight truncate">{track.title}</h3>
-                    <p className="text-sm font-mono mt-1 opacity-70 truncate">{track.artist_name}</p>
-                    <span className="inline-block mt-3 metadata-tag text-[9px] bg-black text-white border-black">
-                      PLAY NOW
+                    <h3 className="text-xl font-black uppercase mt-1 leading-tight truncate">{track.title}</h3>
+                    <p className="text-sm font-mono mt-1.5 opacity-70 truncate">{track.artist_name}</p>
+                    <span className="inline-block mt-4 metadata-tag text-[9px] bg-black text-white border-black">
+                      &#9654; Play Now
                     </span>
                   </div>
                   {track.album_cover_url && (
                     <div className="relative flex-shrink-0">
-                      <img src={track.album_cover_url} alt="" className="w-20 h-20 brutal-border-thin object-cover" />
-                      <span className="absolute -top-2 -right-2 metadata-tag text-[8px] bg-brutal-red text-white border-white">YT</span>
+                      <img src={track.album_cover_url} alt="" className="w-24 h-24 brutal-border-thin object-cover" />
+                      <span className="absolute -top-2.5 -right-2.5 metadata-tag text-[8px] bg-brutal-red text-white border-white">YT</span>
                     </div>
                   )}
                 </div>
@@ -75,18 +69,20 @@ export function Home() {
         </section>
       )}
 
+      {/* Genre category pills */}
       <section>
-        <div className="flex items-center gap-3 mb-6">
-          <span className="section-index">01</span>
-          <h2 className="text-2xl font-black uppercase tracking-tight">Browse Music</h2>
+        <div className="flex items-center gap-4 mb-8">
+          <span className="section-index text-sm font-bold opacity-40">01</span>
+          <h2 className="text-3xl font-black uppercase tracking-tight">Browse Music</h2>
+          <span className="h-px flex-1 bg-black/20 dark:bg-white/20" />
         </div>
         <div className="flex flex-wrap gap-3">
           {CATEGORIES.map((cat) => (
             <button
               key={cat.id}
               onClick={() => setActiveCat(cat.id)}
-              className={`${cat.color} brutal-border ${cat.shadow} px-5 py-3 font-bold uppercase text-sm transition-all hover:-translate-x-0.5 hover:-translate-y-0.5 active:translate-x-0.5 active:translate-y-0.5 ${
-                activeCat === cat.id ? 'ring-3 ring-black scale-105' : ''
+              className={`${cat.color} brutal-border ${cat.shadow} px-6 py-4 font-black uppercase text-sm transition-all hover:-translate-x-1 hover:-translate-y-1 active:translate-x-1 active:translate-y-1 ${
+                activeCat === cat.id ? 'ring-3 ring-black scale-105 z-10' : ''
               }`}
             >
               {cat.label}
@@ -95,18 +91,23 @@ export function Home() {
         </div>
       </section>
 
+      {/* Trending Now */}
       <section>
-        <div className="flex items-center gap-3 mb-6">
-          <span className="section-index">02</span>
-          <h2 className="text-2xl font-black uppercase tracking-tight">
+        <div className="flex items-center gap-4 mb-8">
+          <span className="section-index text-sm font-bold opacity-40">02</span>
+          <h2 className="text-3xl font-black uppercase tracking-tight">
             <span className="text-brutal-red">&#9679;</span> Trending Now
           </h2>
           <span className="metadata-tag text-[9px]">{activeCat.toUpperCase()}</span>
+          <span className="h-px flex-1 bg-black/20 dark:bg-white/20" />
         </div>
         {trendingLoading ? (
-          <p className="font-mono text-sm opacity-50 animate-pulse">loading beats...</p>
+          <div className="flex items-center gap-3 py-8">
+            <span className="w-5 h-5 brutal-border-thin animate-spin border-t-transparent" />
+            <p className="font-mono text-sm opacity-50">Loading trending tracks...</p>
+          </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             {trending?.tracks?.slice(0, 12).map((track: any, i: number) => (
               <TrackCard key={track.id} track={track} index={i} />
             ))}
@@ -114,13 +115,15 @@ export function Home() {
         )}
       </section>
 
+      {/* Recently Played */}
       {homeData?.recentlyPlayed?.length > 0 && (
         <section>
-          <div className="flex items-center gap-3 mb-6">
-            <span className="section-index">03</span>
-            <h2 className="text-2xl font-black uppercase tracking-tight">Recently Played</h2>
+          <div className="flex items-center gap-4 mb-8">
+            <span className="section-index text-sm font-bold opacity-40">03</span>
+            <h2 className="text-3xl font-black uppercase tracking-tight">Recently Played</h2>
+            <span className="h-px flex-1 bg-black/20 dark:bg-white/20" />
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             {homeData.recentlyPlayed.slice(0, 8).map((track: any, i: number) => (
               <TrackCard key={track.id} track={track} index={i} />
             ))}
@@ -128,26 +131,27 @@ export function Home() {
         </section>
       )}
 
+      {/* Featured Playlists */}
       {homeData?.featuredPlaylists?.length > 0 && (
         <section>
-          <div className="flex items-center gap-3 mb-6">
-            <span className="section-index">04</span>
-            <h2 className="text-2xl font-black uppercase tracking-tight">Featured Playlists</h2>
+          <div className="flex items-center gap-4 mb-8">
+            <span className="section-index text-sm font-bold opacity-40">04</span>
+            <h2 className="text-3xl font-black uppercase tracking-tight">Featured Playlists</h2>
+            <span className="h-px flex-1 bg-black/20 dark:bg-white/20" />
           </div>
-          <div className="flex gap-4 overflow-x-auto scrollbar-hide pb-2">
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
             {homeData.featuredPlaylists.map((pl: any) => (
-              <div key={pl.id} className="flex-shrink-0 w-48">
-                <a
-                  href={`/playlists/${pl.id}`}
-                  className="block brutal-card bg-white dark:bg-[#1a1a1a] p-4"
-                >
-                  <div className="w-full aspect-square brutal-border-thin mb-3 flex items-center justify-center bg-brutal-yellow text-4xl">
-                    &#9834;
-                  </div>
-                  <p className="font-bold text-sm truncate uppercase">{pl.name}</p>
-                  <p className="text-xs font-mono opacity-50 mt-1">{pl.tracks_count || 0} tracks</p>
-                </a>
-              </div>
+              <a
+                key={pl.id}
+                href={`/playlists/${pl.id}`}
+                className="brutal-card p-5 block transition-all hover:-translate-x-1 hover:-translate-y-1"
+              >
+                <div className="w-full aspect-square brutal-border-thin mb-4 flex items-center justify-center bg-brutal-yellow text-3xl font-black">
+                  &#9834;
+                </div>
+                <p className="font-black text-sm uppercase truncate leading-tight">{pl.name}</p>
+                <p className="text-xs font-mono opacity-40 mt-1.5">{pl.tracks_count || 0} tracks</p>
+              </a>
             ))}
           </div>
         </section>

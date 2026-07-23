@@ -23,31 +23,37 @@ export function TrackCard({ track, index }: TrackCardProps) {
   return (
     <div
       onClick={() => play(track)}
-      className={`brutal-card flex items-center gap-4 p-3 cursor-pointer ${
-        isActive ? 'bg-brutal-yellow' : 'bg-white dark:bg-[#1a1a1a]'
+        className={`brutal-card flex items-center gap-5 px-5 py-4 cursor-pointer ${
+        isActive ? 'bg-brutal-yellow text-black' : 'bg-[#1e1e1e]'
       }`}
     >
       {index !== undefined && (
-        <span className="section-index w-6 text-center">{String(index + 1).padStart(2, '0')}</span>
+        <span className="section-index w-8 text-center text-sm font-mono">
+          {String(index + 1).padStart(2, '0')}
+        </span>
       )}
-      <div className="relative">
-        {track.album_cover_url && (
-          <img src={track.album_cover_url} alt="" className="w-10 h-10 brutal-border-thin object-cover" />
+      <div className="relative flex-shrink-0">
+        {track.album_cover_url ? (
+          <img src={track.album_cover_url} alt="" className="w-14 h-14 brutal-border-thin object-cover" />
+        ) : (
+          <div className="w-14 h-14 brutal-border-thin bg-brutal-yellow flex items-center justify-center text-lg font-black">
+            &#9834;
+          </div>
         )}
         {isYoutube && (
-          <span className="absolute -top-1.5 -right-1.5 metadata-tag text-[8px] px-1 py-0.5 bg-brutal-red text-white border-white leading-none">
+          <span className="absolute -top-2 -right-2 metadata-tag text-[7px] px-1.5 py-0.5 bg-brutal-red text-white border-white leading-none">
             YT
           </span>
         )}
       </div>
       <div className="flex-1 min-w-0">
-        <p className="font-bold text-sm truncate">{track.title}</p>
-        <p className="text-xs font-mono opacity-60 truncate">{track.artist_name}</p>
+        <p className="font-black text-base uppercase tracking-tight truncate leading-tight">{track.title}</p>
+        <p className="text-xs font-mono opacity-50 mt-1 truncate">{track.artist_name}</p>
       </div>
       {isYoutube && track.plays_count ? (
-        <span className="metadata-tag text-[9px]">{(track.plays_count / 1000000).toFixed(1)}M</span>
+        <span className="metadata-tag text-[9px] flex-shrink-0">{(track.plays_count / 1000000).toFixed(1)}M</span>
       ) : null}
-      <span className="metadata-tag">{formatDuration(track.duration)}</span>
+      <span className="metadata-tag flex-shrink-0">{formatDuration(track.duration)}</span>
     </div>
   );
 }

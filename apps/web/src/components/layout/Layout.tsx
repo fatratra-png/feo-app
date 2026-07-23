@@ -6,7 +6,7 @@ export function Layout() {
   return (
     <div className="flex min-h-screen">
       <Sidebar />
-      <main className="ml-64 flex-1 pb-24">
+      <main className="ml-72 flex-1 pb-28">
         <Outlet />
       </main>
       <PlayerBar />

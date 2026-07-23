@@ -26,10 +26,10 @@ export function Discover() {
   });
 
   return (
-    <div className="p-8 space-y-8">
-      <div className="flex items-center gap-3">
+    <div className="p-10 space-y-12 max-w-6xl mx-auto">
+      <div className="flex items-center gap-4">
         <span className="section-index text-lg">🌐</span>
-        <h1 className="text-3xl font-black uppercase tracking-tight">Discover</h1>
+        <h1 className="text-4xl font-black uppercase tracking-tight">Discover</h1>
         <span className="metadata-tag text-[9px]">YouTube worldwide</span>
       </div>
 
@@ -38,8 +38,8 @@ export function Discover() {
           <button
             key={g.id}
             onClick={() => setActiveId(g.id)}
-            className={`${g.color} brutal-border ${g.shadow} px-5 py-3 font-bold uppercase text-sm transition-all hover:-translate-x-0.5 hover:-translate-y-0.5 active:translate-x-0.5 active:translate-y-0.5 ${
-              activeId === g.id ? 'ring-3 ring-black scale-105' : ''
+            className={`${g.color} brutal-border ${g.shadow} px-6 py-4 font-black uppercase text-sm transition-all hover:-translate-x-1 hover:-translate-y-1 active:translate-x-1 active:translate-y-1 ${
+              activeId === g.id ? 'ring-3 ring-black scale-105 z-10' : ''
             }`}
           >
             {g.icon} {g.label}
@@ -48,15 +48,19 @@ export function Discover() {
       </div>
 
       <section>
-        <div className="flex items-center gap-3 mb-4">
-          <span className="section-index">01</span>
-          <h2 className="text-2xl font-black uppercase">{active.label}</h2>
+        <div className="flex items-center gap-4 mb-8">
+          <span className="section-index text-sm font-bold opacity-40">01</span>
+          <h2 className="text-3xl font-black uppercase tracking-tight">{active.label}</h2>
           <span className="metadata-tag text-[9px]">Trending</span>
+          <span className="h-px flex-1 bg-black/20 dark:bg-white/20" />
         </div>
         {isLoading ? (
-          <p className="font-mono text-sm opacity-50 animate-pulse">loading worldwide tracks...</p>
+          <div className="flex items-center gap-3 py-8">
+            <span className="w-5 h-5 brutal-border-thin animate-spin border-t-transparent" />
+            <p className="font-mono text-sm opacity-50">Loading worldwide tracks...</p>
+          </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             {data?.tracks?.map((track: any, i: number) => (
               <TrackCard key={track.id} track={track} index={i} />
             ))}

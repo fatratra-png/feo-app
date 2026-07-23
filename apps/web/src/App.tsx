@@ -42,7 +42,7 @@ function ThemeInit() {
   const { isDark } = useThemeStore();
 
   useEffect(() => {
-    document.documentElement.classList.toggle('dark', isDark);
+    document.documentElement.classList.toggle('light', !isDark);
   }, [isDark]);
 
   return null;
