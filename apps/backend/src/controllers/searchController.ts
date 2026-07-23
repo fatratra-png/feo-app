@@ -3,6 +3,7 @@ import { trackRepository } from '../repositories/trackRepository';
 import { albumRepository } from '../repositories/albumRepository';
 import { artistRepository } from '../repositories/artistRepository';
 import { playlistRepository } from '../repositories/playlistRepository';
+import { youtubeService } from '../services/youtubeService';
 
 export const searchController = {
   async search(req: Request, res: Response, next: NextFunction) {
@@ -12,14 +13,21 @@ export const searchController = {
         return res.json({ tracks: [], albums: [], artists: [], playlists: [] });
       }
 
-      const [tracks, albums, artists, playlists] = await Promise.all([
+      const [localTracks, albums, artists, playlists] = await Promise.all([
         trackRepository.search(q),
         albumRepository.search(q),
         artistRepository.search(q),
         playlistRepository.search(q),
       ]);
 
-      res.json({ tracks, albums, artists, playlists });
+      const youtubeTracks = youtubeService.search(q, 8);
+
+      const tracks = [
+        ...localTracks.map((t: any) => ({ ...t, source: 'local' })),
+        ...youtubeTracks,
+      ];
+
+      res.json({ tracks, albums, artists, playlists, youtubeTracks });
     } catch (err) {
       next(err);
     }

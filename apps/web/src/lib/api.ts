@@ -140,6 +140,13 @@ export const searchApi = {
   search: (q: string) => api(`/search?q=${encodeURIComponent(q)}`),
 };
 
+// YouTube
+export const youtubeApi = {
+  search: (q: string) => api(`/youtube/search?q=${encodeURIComponent(q)}`),
+  getAudioUrl: (youtubeId: string) => api(`/youtube/play/${youtubeId}`),
+  getDetails: (youtubeId: string) => api(`/youtube/details/${youtubeId}`),
+};
+
 // Library
 export const libraryApi = {
   getLibrary: () => api('/library'),

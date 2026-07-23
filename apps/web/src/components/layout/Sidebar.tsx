@@ -14,7 +14,7 @@ export function Sidebar() {
     <aside className="w-64 h-screen fixed left-0 top-0 brutal-border bg-white dark:bg-[#1a1a1a] z-40 flex flex-col">
       <div className="p-6 border-b-3 border-black dark:border-[#444]">
         <h1 className="text-3xl font-black tracking-tighter">FEO.</h1>
-        <p className="text-xs font-mono mt-1 opacity-50">sound in Malagasy</p>
+        <p className="text-xs font-mono mt-1 opacity-50">Henoy ara</p>
       </div>
 
       <nav className="flex-1 p-4 space-y-1">

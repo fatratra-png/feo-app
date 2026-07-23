@@ -1,6 +1,6 @@
 # FEO.
 
-**Sound in Malagasy** — A Spotify clone with neo-brutalist design.
+**Henoy ara** — A Spotify clone with neo-brutalist design.
 
 ## Tech Stack
 

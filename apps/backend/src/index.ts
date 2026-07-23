@@ -11,6 +11,7 @@ import likeRoutes from './routes/likes';
 import followRoutes from './routes/follows';
 import searchRoutes from './routes/search';
 import libraryRoutes from './routes/library';
+import youtubeRoutes from './routes/youtube';
 
 const app = express();
 
@@ -30,6 +31,7 @@ app.use('/api/likes', likeRoutes);
 app.use('/api/follows', followRoutes);
 app.use('/api/search', searchRoutes);
 app.use('/api/library', libraryRoutes);
+app.use('/api/youtube', youtubeRoutes);
 
 app.use(errorHandler);
 

@@ -8,10 +8,10 @@ export function PlayerBar() {
     isPlaying,
     volume,
     progress,
-    play,
     pause,
     next,
     previous,
+    isLoadingAudio,
     setVolume,
     setProgress,
   } = usePlayerStore();
@@ -29,13 +29,15 @@ export function PlayerBar() {
   useEffect(() => {
     const audio = audioRef.current;
     if (!audio) return;
-
     if (currentTrack?.file_url) {
-      audio.src = currentTrack.file_url;
+      if (audio.src !== currentTrack.file_url) {
+        audio.src = currentTrack.file_url;
+        audio.load();
+      }
       audio.volume = volume;
       if (isPlaying) audio.play().catch(() => {});
     }
-  }, [currentTrack?.id]);
+  }, [currentTrack?.file_url, currentTrack?.id]);
 
   useEffect(() => {
     const audio = audioRef.current;
@@ -45,7 +47,7 @@ export function PlayerBar() {
 
   useEffect(() => {
     const audio = audioRef.current;
-    if (!audio) return;
+    if (!audio || !currentTrack?.file_url) return;
     if (isPlaying) audio.play().catch(() => {});
     else audio.pause();
   }, [isPlaying]);
@@ -63,6 +65,8 @@ export function PlayerBar() {
     };
   }, [next, setProgress]);
 
+  const resume = () => usePlayerStore.getState().resume();
+
   if (!currentTrack) return null;
 
   return (
@@ -70,11 +74,18 @@ export function PlayerBar() {
       <div className="flex items-center gap-4 max-w-6xl mx-auto">
         <div className="flex items-center gap-3 w-72">
           {currentTrack.album_cover_url && (
-            <img
-              src={currentTrack.album_cover_url}
-              alt=""
-              className="w-12 h-12 brutal-border-thin object-cover"
-            />
+            <div className="relative">
+              <img
+                src={currentTrack.album_cover_url}
+                alt=""
+                className="w-12 h-12 brutal-border-thin object-cover"
+              />
+              {currentTrack.source === 'youtube' && (
+                <span className="absolute -top-1.5 -right-1.5 metadata-tag text-[8px] px-1 py-0.5 bg-brutal-red text-white border-white">
+                  YT
+                </span>
+              )}
+            </div>
           )}
           <div className="min-w-0">
             <p className="font-bold text-sm truncate">{currentTrack.title}</p>
@@ -89,9 +100,10 @@ export function PlayerBar() {
             </button>
             <button
               onClick={() => (isPlaying ? pause() : resume())}
-              className="brutal-btn px-4 py-1 text-sm font-bold bg-brutal-yellow"
+              className="brutal-btn px-4 py-1 text-sm font-bold bg-brutal-yellow min-w-[44px] text-center"
+              disabled={isLoadingAudio}
             >
-              {isPlaying ? '⏸' : '▶'}
+              {isLoadingAudio ? '⋯' : isPlaying ? '⏸' : '▶'}
             </button>
             <button onClick={next} className="brutal-btn px-3 py-1 text-sm bg-white dark:bg-[#333]">
               ⏭
@@ -134,8 +146,4 @@ export function PlayerBar() {
       </div>
     </div>
   );
-}
-
-function resume() {
-  usePlayerStore.getState().resume();
 }

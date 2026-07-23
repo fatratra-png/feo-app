@@ -14,6 +14,9 @@ export function Search() {
     enabled: query.length > 0,
   });
 
+  const youtubeTracks = data?.tracks?.filter((t: any) => t.source === 'youtube') || [];
+  const localTracks = data?.tracks?.filter((t: any) => t.source !== 'youtube') || [];
+
   return (
     <div className="p-8 space-y-8">
       <div className="flex items-center gap-3">
@@ -25,7 +28,7 @@ export function Search() {
         type="text"
         value={query}
         onChange={(e) => setQuery(e.target.value)}
-        placeholder="Search artists, albums, tracks..."
+        placeholder="Search worldwide — artists, albums, tracks..."
         className="brutal-input w-full px-6 py-4 text-lg bg-white dark:bg-[#1a1a1a]"
         autoFocus
       />
@@ -66,21 +69,37 @@ export function Search() {
             </section>
           )}
 
-          {data.tracks?.length > 0 && (
+          {youtubeTracks.length > 0 && (
             <section>
               <div className="flex items-center gap-3 mb-4">
                 <span className="section-index">03</span>
-                <h2 className="text-xl font-black uppercase">Tracks</h2>
+                <h2 className="text-xl font-black uppercase">
+                  YouTube <span className="text-xs font-mono font-normal opacity-60 normal-case">({query})</span>
+                </h2>
               </div>
               <div className="space-y-2">
-                {data.tracks.map((track: any, i: number) => (
+                {youtubeTracks.map((track: any, i: number) => (
                   <TrackCard key={track.id} track={track} index={i} />
                 ))}
               </div>
             </section>
           )}
 
-          {data.artists?.length === 0 && data.albums?.length === 0 && data.tracks?.length === 0 && (
+          {localTracks.length > 0 && (
+            <section>
+              <div className="flex items-center gap-3 mb-4">
+                <span className="section-index">04</span>
+                <h2 className="text-xl font-black uppercase">Local Tracks</h2>
+              </div>
+              <div className="space-y-2">
+                {localTracks.map((track: any, i: number) => (
+                  <TrackCard key={track.id} track={{ ...track, source: 'local' }} index={i} />
+                ))}
+              </div>
+            </section>
+          )}
+
+          {!isLoading && data.tracks?.length === 0 && data.artists?.length === 0 && data.albums?.length === 0 && (
             <p className="font-mono text-sm opacity-50">no results found</p>
           )}
         </div>
