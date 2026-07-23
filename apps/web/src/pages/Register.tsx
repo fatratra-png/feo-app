@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { authApi } from '../lib/api';
 import { useAuthStore } from '../stores/authStore';
+import { DotGrid } from '../components/ui/DotGrid';
 
 export function Register() {
   const [email, setEmail] = useState('');
@@ -27,20 +28,15 @@ export function Register() {
 
   return (
     <div className="min-h-screen flex items-center justify-center p-8 bg-background dot-grid">
+      <DotGrid />
       <div className="w-full max-w-md">
-        <div className="rounded-2xl border-2 border-foreground bg-card p-10 brutal-shadow-blush-lg rotate-[0.5deg]">
-          <div className="flex items-center gap-4 mb-2">
-            <div className="size-12 rounded-full border-2 border-foreground bg-gradient-to-br from-saffron via-blush to-mint flex items-center justify-center rotate-3">
-              <span className="text-xl font-display font-extrabold text-black">F</span>
-            </div>
-            <h1 className="font-display text-4xl font-extrabold tracking-[-0.03em] leading-none">
-              <span className="text-saffron">F</span>
-              <span className="text-blush">E</span>
-              <span className="text-mint">O</span>
-              <span className="text-foreground">.</span>
+        <div className="rounded-2xl border-2 border-foreground bg-card p-10 brutal-shadow-ink rotate-[0.5deg]">
+          <div className="text-center mb-8">
+            <h1 className="font-body font-black text-5xl tracking-[-0.08em] leading-[0.85] text-white">
+              F<span className="text-white/80">E</span><span className="text-white/60">O</span><span className="text-white/40">.</span>
             </h1>
+            <p className="eyebrow mt-4">Create your account</p>
           </div>
-          <p className="eyebrow mb-8">Create your account</p>
 
           <form onSubmit={handleSubmit} className="space-y-5">
             <div>
@@ -62,7 +58,7 @@ export function Register() {
               </div>
             )}
 
-            <button type="submit" className="w-full rounded-full border-2 border-foreground bg-saffron text-black px-8 py-4 font-display font-bold text-sm tracking-wide transition-all hover:bg-saffron/90 active:translate-y-[1px] brutal-shadow-ink">
+            <button type="submit" className="w-full rounded-full border-2 border-foreground bg-saffron text-black px-8 py-4 font-body font-black text-sm tracking-wider uppercase transition-all hover:bg-saffron/90 active:translate-y-[1px] brutal-shadow-ink">
               Create Account
             </button>
           </form>
