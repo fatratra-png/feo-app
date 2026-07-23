@@ -1,0 +1,24 @@
+{
+  "expo": {
+    "name": "FEO",
+    "slug": "feo",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "automatic",
+    "splash": {
+      "backgroundColor": "#F5F5F0"
+    },
+    "assetBundlePatterns": ["**/*"],
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.feo.app"
+    },
+    "android": {
+      "adaptiveIcon": {
+        "backgroundColor": "#F5F5F0"
+      },
+      "package": "com.feo.app"
+    }
+  }
+}

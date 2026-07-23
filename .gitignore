@@ -9,4 +9,5 @@ dist/
 *.log
 coverage/
 .turbo/
-.tmp/
+.tmp/node_modules/
+dist/
