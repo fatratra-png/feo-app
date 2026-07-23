@@ -50,11 +50,8 @@ export function Home() {
         <div className="w-full flex flex-col items-center max-w-xl">
           <div className="mb-10 sm:mb-14 text-center relative">
             <div className="absolute -top-4 left-1/2 -translate-x-1/2 w-24 h-1 bg-gradient-to-r from-saffron via-blush to-mint rounded-full -rotate-2" />
-            <h1 className="font-display text-6xl sm:text-8xl md:text-9xl font-extrabold tracking-[-0.06em] leading-none brutal-shadow-ink inline-block px-4 py-2 -rotate-1 hover:rotate-0 transition-all duration-500">
-              <span className="text-saffron">F</span>
-              <span className="text-blush">E</span>
-              <span className="text-mint">O</span>
-              <span className="text-foreground">.</span>
+            <h1 className="font-body font-black text-7xl sm:text-9xl md:text-[10rem] tracking-[-0.08em] leading-[0.85] text-white brutal-shadow-ink inline-block px-4 py-1 -rotate-1 hover:rotate-0 transition-all duration-500">
+              F<span className="text-white/80">E</span><span className="text-white/60">O</span><span className="text-white/40">.</span>
             </h1>
             <p className="mt-4 font-mono text-[10px] sm:text-xs tracking-[0.3em] text-foreground/25 uppercase">Henoy ara</p>
           </div>
