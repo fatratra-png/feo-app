@@ -9,9 +9,8 @@ import { Login } from './pages/Login';
 import { Register } from './pages/Register';
 import { Home } from './pages/Home';
 import { Search } from './pages/Search';
+import { Discover } from './pages/Discover';
 import { Library } from './pages/Library';
-import { ArtistDetail } from './pages/ArtistDetail';
-import { AlbumDetail } from './pages/AlbumDetail';
 import { PlaylistDetail } from './pages/PlaylistDetail';
 
 const queryClient = new QueryClient({
@@ -20,7 +19,7 @@ const queryClient = new QueryClient({
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { isAuthenticated, isLoading } = useAuthStore();
-  if (isLoading) return <div className="p-8 font-mono text-sm opacity-50">loading...</div>;
+  if (isLoading) return <div className="p-8 font-mono text-sm opacity-50 animate-pulse">loading...</div>;
   if (!isAuthenticated) return <Navigate to="/login" replace />;
   return <>{children}</>;
 }
@@ -67,9 +66,8 @@ export function App() {
             >
               <Route path="/" element={<Home />} />
               <Route path="/search" element={<Search />} />
+              <Route path="/discover" element={<Discover />} />
               <Route path="/library" element={<Library />} />
-              <Route path="/artists/:id" element={<ArtistDetail />} />
-              <Route path="/albums/:id" element={<AlbumDetail />} />
               <Route path="/playlists/:id" element={<PlaylistDetail />} />
             </Route>
             <Route path="*" element={<Navigate to="/" replace />} />

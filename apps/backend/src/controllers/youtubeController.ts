@@ -1,6 +1,14 @@
 import { Request, Response, NextFunction } from 'express';
 import { youtubeService } from '../services/youtubeService';
 
+const TRENDING_QUERIES = [
+  'trending music 2024',
+  'top hits 2024',
+  'new popular songs',
+  'viral music',
+  'pop hits worldwide',
+];
+
 export const youtubeController = {
   search(req: Request, res: Response, next: NextFunction) {
     try {
@@ -13,6 +21,34 @@ export const youtubeController = {
     } catch (err) {
       next(err);
     }
+  },
+
+  trending(req: Request, res: Response, next: NextFunction) {
+    try {
+      const category = req.query.cat as string;
+      const query = category || 'trending music';
+      const tracks = youtubeService.search(query, 12);
+      res.json({ tracks, category });
+    } catch (err) {
+      next(err);
+    }
+  },
+
+  categories(_req: Request, res: Response) {
+    res.json({
+      categories: [
+        { id: 'pop', label: 'Pop', query: 'pop hits 2024' },
+        { id: 'hiphop', label: 'Hip Hop', query: 'hip hop rap' },
+        { id: 'rnb', label: 'R&B', query: 'rnb soul' },
+        { id: 'rock', label: 'Rock', query: 'rock classics' },
+        { id: 'electronic', label: 'Electronic', query: 'electronic dance music' },
+        { id: 'jazz', label: 'Jazz', query: 'jazz relaxing' },
+        { id: 'classical', label: 'Classical', query: 'classical music' },
+        { id: 'afro', label: 'Afro', query: 'afrobeat african music' },
+        { id: 'reggae', label: 'Reggae', query: 'reggae dancehall' },
+        { id: 'latino', label: 'Latino', query: 'latin music salsa' },
+      ],
+    });
   },
 
   async getAudioUrl(req: Request, res: Response, next: NextFunction) {

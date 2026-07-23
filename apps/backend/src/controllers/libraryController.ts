@@ -3,7 +3,6 @@ import { playlistRepository } from '../repositories/playlistRepository';
 import { likeRepository } from '../repositories/likeRepository';
 import { followRepository } from '../repositories/followRepository';
 import { historyRepository } from '../repositories/historyRepository';
-import { trackRepository } from '../repositories/trackRepository';
 import { AuthRequest } from '../middleware/auth';
 
 export const libraryController = {
@@ -25,13 +24,12 @@ export const libraryController = {
 
   async getHome(req: AuthRequest, res: Response, next: NextFunction) {
     try {
-      const [recentlyPlayed, featuredPlaylists, topTracks] = await Promise.all([
+      const [recentlyPlayed, featuredPlaylists] = await Promise.all([
         historyRepository.getByUser(req.userId!, 10),
         playlistRepository.findAll(1, 6),
-        trackRepository.findAll(1, 10),
       ]);
 
-      res.json({ recentlyPlayed, featuredPlaylists: featuredPlaylists.rows, topTracks: topTracks.rows });
+      res.json({ recentlyPlayed, featuredPlaylists: featuredPlaylists.rows });
     } catch (err) {
       next(err);
     }

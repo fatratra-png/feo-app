@@ -3,9 +3,6 @@ import cors from 'cors';
 import { config } from './config';
 import { errorHandler } from './middleware/errorHandler';
 import authRoutes from './routes/auth';
-import trackRoutes from './routes/tracks';
-import albumRoutes from './routes/albums';
-import artistRoutes from './routes/artists';
 import playlistRoutes from './routes/playlists';
 import likeRoutes from './routes/likes';
 import followRoutes from './routes/follows';
@@ -23,9 +20,6 @@ app.get('/api/health', (_req, res) => {
 });
 
 app.use('/api/auth', authRoutes);
-app.use('/api/tracks', trackRoutes);
-app.use('/api/albums', albumRoutes);
-app.use('/api/artists', artistRoutes);
 app.use('/api/playlists', playlistRoutes);
 app.use('/api/likes', likeRoutes);
 app.use('/api/follows', followRoutes);

@@ -26,10 +26,15 @@ export function Register() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-8">
+    <div className="min-h-screen flex items-center justify-center p-8 bg-offwhite dark:bg-[#0d0d0d]">
       <div className="w-full max-w-md">
-        <div className="brutal-border bg-white dark:bg-[#1a1a1a] p-8">
-          <h1 className="text-4xl font-black tracking-tighter mb-1">FEO.</h1>
+        <div className="brutal-border bg-white dark:bg-[#1a1a1a] p-8 brutal-shadow-pink">
+          <h1 className="text-5xl font-black tracking-tighter mb-1">
+            <span className="text-brutal-yellow">F</span>
+            <span className="text-brutal-pink">E</span>
+            <span className="text-brutal-blue">O</span>
+            <span className="text-brutal-red">.</span>
+          </h1>
           <p className="text-sm font-mono mb-8 opacity-60">create your account</p>
 
           <form onSubmit={handleSubmit} className="space-y-4">
@@ -39,7 +44,7 @@ export function Register() {
                 type="text"
                 value={displayName}
                 onChange={(e) => setDisplayName(e.target.value)}
-                className="brutal-input w-full px-4 py-3 text-sm bg-offwhite dark:bg-[#333]"
+                className="brutal-input w-full px-4 py-3 text-sm"
                 required
               />
             </div>
@@ -49,7 +54,7 @@ export function Register() {
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="brutal-input w-full px-4 py-3 text-sm bg-offwhite dark:bg-[#333]"
+                className="brutal-input w-full px-4 py-3 text-sm"
                 required
               />
             </div>
@@ -59,7 +64,7 @@ export function Register() {
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="brutal-input w-full px-4 py-3 text-sm bg-offwhite dark:bg-[#333]"
+                className="brutal-input w-full px-4 py-3 text-sm"
                 required
                 minLength={6}
               />
@@ -67,16 +72,14 @@ export function Register() {
 
             {error && <p className="text-sm font-bold text-brutal-red">{error}</p>}
 
-            <button type="submit" className="brutal-btn w-full py-3 text-sm font-bold bg-brutal-yellow">
+            <button type="submit" className="brutal-btn w-full py-3 text-sm font-bold bg-brutal-blue text-white">
               Create Account
             </button>
           </form>
 
           <p className="text-xs text-center mt-6 font-mono">
             Already have an account?{' '}
-            <Link to="/login" className="font-bold underline">
-              Sign In
-            </Link>
+            <Link to="/login" className="font-bold underline">Sign In</Link>
           </p>
         </div>
       </div>
