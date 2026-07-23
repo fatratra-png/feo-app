@@ -1,0 +1,16 @@
+{
+  "name": "feo",
+  "private": true,
+  "version": "1.0.0",
+  "description": "FEO. — A Spotify clone with neo-brutalist design",
+  "scripts": {
+    "dev:backend": "node scripts/dev-backend.js",
+    "dev:web": "node scripts/dev-web.js",
+    "build:shared": "cd packages/shared && npm run build",
+    "build:backend": "cd apps/backend && npm run build",
+    "build:web": "cd apps/web && npm run build",
+    "db:migrate": "cd apps/backend && npm run db:migrate",
+    "db:seed": "cd apps/backend && npm run db:seed",
+    "db:studio": "cd apps/backend && npm run db:studio"
+  }
+}
