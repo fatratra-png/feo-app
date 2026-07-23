@@ -10,6 +10,9 @@ const OFFICIAL_PATTERNS = [
   /\s*\(?visualizer\)?\s*/gi,
   /\s*\(?4k\)?\s*/gi,
   /\s*\(?hd\)?\s*/gi,
+  /\s*\(?remastered\)?\s*/gi,
+  /\s*\(?remaster\)?\s*/gi,
+  /\s*\(?explicit\)?\s*/gi,
   /\s*\[official\s*(music\s*)?video\]\s*/gi,
   /\s*\[official\s*lyric\s*video\]\s*/gi,
   /\s*\[music\s*video\]\s*/gi,
@@ -106,6 +109,8 @@ export function extractMetadata(rawTitle: string, channelName: string): { title:
   title = title.replace(/[-–—]+$/g, '').trim();
 
   if (artist.length < 2) artist = channelName;
+
+  artist = artist.replace(/vevo.*$/i, '').replace(/-?official$/i, '').trim();
 
   if (title.length < 2) title = cleaned;
 
