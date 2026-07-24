@@ -66,7 +66,7 @@ export function Login() {
 
         <div className="rounded-2xl border-2 border-blush bg-blush p-5 brutal-shadow-blush rotate-[0.5deg]">
           <p className="text-[9px] font-mono font-bold text-center uppercase tracking-widest text-black">
-            Demo: test@gmail.com / passtestuser21
+            Demo credentials available in documentation
           </p>
         </div>
       </div>

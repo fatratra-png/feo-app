@@ -13,7 +13,8 @@ import recommendationRoutes from './routes/recommendations';
 
 const app = express();
 
-app.use(cors({ origin: '*', credentials: true }));
+const corsOrigin = process.env.FRONTEND_URL || (config.nodeEnv === 'production' ? 'https://yourdomain.com' : 'http://localhost:5173');
+app.use(cors({ origin: corsOrigin, credentials: true }));
 app.use(express.json());
 
 app.get('/api/health', (_req, res) => {

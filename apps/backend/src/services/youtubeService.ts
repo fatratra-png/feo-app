@@ -1,4 +1,4 @@
-import { execSync } from 'child_process';
+import { execFileSync } from 'child_process';
 import { cleanTitle, extractMetadata, detectGenre, relatedSearchQuery } from './metadataCleaner';
 
 interface YouTubeTrack {
@@ -45,8 +45,17 @@ function parseLine(line: string): YouTubeTrack | null {
 }
 
 function ytSearch(query: string, maxResults: number): YouTubeTrack[] {
-  const cmd = `yt-dlp --dump-json --no-warnings --flat-playlist "ytsearch${maxResults}:${query.replace(/"/g, '\\"')}" 2>/dev/null`;
-  const output = execSync(cmd, { timeout: 15000, encoding: 'utf-8', maxBuffer: 10 * 1024 * 1024 });
+  const output = execFileSync('yt-dlp', [
+    '--dump-json',
+    '--no-warnings',
+    '--flat-playlist',
+    `ytsearch${maxResults}:${query}`
+  ], { 
+    timeout: 15000, 
+    encoding: 'utf-8', 
+    maxBuffer: 10 * 1024 * 1024,
+    stdio: ['pipe', 'pipe', 'pipe']
+  });
   return output.trim().split('\n').filter(Boolean).map(parseLine).filter(Boolean) as YouTubeTrack[];
 }
 
@@ -75,9 +84,22 @@ export const youtubeService = {
 
   getAudioUrl(youtubeId: string): string | null {
     try {
+      if (!/^[a-zA-Z0-9_-]{11}$/.test(youtubeId)) {
+        console.error('Invalid YouTube ID format:', youtubeId);
+        return null;
+      }
       const url = `https://www.youtube.com/watch?v=${youtubeId}`;
-      const cmd = `yt-dlp -f bestaudio --get-url --no-warnings "${url}" 2>/dev/null`;
-      const output = execSync(cmd, { timeout: 15000, encoding: 'utf-8', maxBuffer: 1024 * 1024 });
+      const output = execFileSync('yt-dlp', [
+        '-f', 'bestaudio',
+        '--get-url',
+        '--no-warnings',
+        url
+      ], { 
+        timeout: 15000, 
+        encoding: 'utf-8', 
+        maxBuffer: 1024 * 1024,
+        stdio: ['pipe', 'pipe', 'pipe']
+      });
       return output.trim();
     } catch (err) {
       console.error('Failed to get audio URL for', youtubeId, err);
@@ -87,9 +109,21 @@ export const youtubeService = {
 
   getDetails(youtubeId: string): YouTubeTrack | null {
     try {
+      if (!/^[a-zA-Z0-9_-]{11}$/.test(youtubeId)) {
+        console.error('Invalid YouTube ID format:', youtubeId);
+        return null;
+      }
       const url = `https://www.youtube.com/watch?v=${youtubeId}`;
-      const cmd = `yt-dlp --dump-json --no-warnings "${url}" 2>/dev/null`;
-      const output = execSync(cmd, { timeout: 15000, encoding: 'utf-8', maxBuffer: 5 * 1024 * 1024 });
+      const output = execFileSync('yt-dlp', [
+        '--dump-json',
+        '--no-warnings',
+        url
+      ], { 
+        timeout: 15000, 
+        encoding: 'utf-8', 
+        maxBuffer: 5 * 1024 * 1024,
+        stdio: ['pipe', 'pipe', 'pipe']
+      });
       return parseLine(output.trim());
     } catch (err) {
       console.error('Failed to get YouTube details for', youtubeId, err);
