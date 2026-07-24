@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { api, youtubeApi } from '../lib/api';
 
 interface Track {
   id: string;
@@ -63,9 +64,8 @@ interface PlayerState {
 
 function fetchAudio(track: Track): Promise<string | null> {
   if (track.source !== 'youtube' || !track.youtube_id) return Promise.resolve(null);
-  return fetch(`/api/youtube/play/${track.youtube_id}`)
-    .then((r) => r.json())
-    .then((data) => data.audioUrl || null)
+  return youtubeApi.getAudioUrl(track.youtube_id)
+    .then((data: any) => data.audioUrl || null)
     .catch(() => null);
 }
 
@@ -126,9 +126,8 @@ export const usePlayerStore = create<PlayerState>((set, get) => ({
     });
 
     if (needsFetch && track.youtube_id) {
-      fetch(`/api/youtube/play/${track.youtube_id}`)
-        .then((r) => r.json())
-        .then((data) => {
+      youtubeApi.getAudioUrl(track.youtube_id)
+        .then((data: any) => {
           if (data.audioUrl) {
             get().setTrackAudioUrl(track.id, data.audioUrl);
             set({ isPlaying: true, isLoadingAudio: false });
@@ -199,9 +198,8 @@ export const usePlayerStore = create<PlayerState>((set, get) => ({
           playHistory: history.slice(-50),
         });
         if (needsFetch && nextTrack.youtube_id) {
-          fetch(`/api/youtube/play/${nextTrack.youtube_id}`)
-            .then((r) => r.json())
-            .then((data) => {
+          youtubeApi.getAudioUrl(nextTrack.youtube_id)
+            .then((data: any) => {
               if (data.audioUrl) {
                 get().setTrackAudioUrl(nextTrack.id, data.audioUrl);
                 set({ isPlaying: true, isLoadingAudio: false });
@@ -213,9 +211,8 @@ export const usePlayerStore = create<PlayerState>((set, get) => ({
       } else if (autoPlay && currentTrack) {
         set({ isLoadingAudio: true, playHistory: history.slice(-50) });
         const query = `${currentTrack.title} ${currentTrack.artist_name}`;
-        fetch(`/api/youtube/related?q=${encodeURIComponent(query)}&title=${encodeURIComponent(currentTrack.title)}&artist=${encodeURIComponent(currentTrack.artist_name)}`)
-          .then((r) => r.json())
-          .then((data) => {
+        youtubeApi.related(query)
+          .then((data: any) => {
             const tracks = data.tracks || [];
             const filtered = tracks.filter((t: any) => t.id !== currentTrack.id);
             if (filtered.length > 0) {
@@ -233,9 +230,8 @@ export const usePlayerStore = create<PlayerState>((set, get) => ({
                 isLoadingAudio: needsFetch,
               });
               if (needsFetch && nextTrack.youtube_id) {
-                fetch(`/api/youtube/play/${nextTrack.youtube_id}`)
-                  .then((r) => r.json())
-                  .then((data) => {
+                youtubeApi.getAudioUrl(nextTrack.youtube_id)
+                  .then((data: any) => {
                     if (data.audioUrl) {
                       get().setTrackAudioUrl(nextTrack.id, data.audioUrl);
                       set({ isPlaying: true, isLoadingAudio: false });
@@ -272,9 +268,8 @@ export const usePlayerStore = create<PlayerState>((set, get) => ({
     });
 
     if (needsFetch && nextTrack.youtube_id) {
-      fetch(`/api/youtube/play/${nextTrack.youtube_id}`)
-        .then((r) => r.json())
-        .then((data) => {
+      youtubeApi.getAudioUrl(nextTrack.youtube_id)
+        .then((data: any) => {
           if (data.audioUrl) {
             get().setTrackAudioUrl(nextTrack.id, data.audioUrl);
             set({ isPlaying: true, isLoadingAudio: false });
@@ -298,9 +293,8 @@ export const usePlayerStore = create<PlayerState>((set, get) => ({
         isLoadingAudio: needsFetch,
       });
       if (needsFetch && prevTrack.youtube_id) {
-        fetch(`/api/youtube/play/${prevTrack.youtube_id}`)
-          .then((r) => r.json())
-          .then((data) => {
+        youtubeApi.getAudioUrl(prevTrack.youtube_id)
+          .then((data: any) => {
             if (data.audioUrl) {
               get().setTrackAudioUrl(prevTrack.id, data.audioUrl);
               set({ isPlaying: true, isLoadingAudio: false });
@@ -448,11 +442,8 @@ export const usePlayerStore = create<PlayerState>((set, get) => ({
 
   populateQueueWithRecommendations: async (track: Track) => {
     try {
-      const response = await fetch(`/api/recommendations/up-next?track_id=${track.id}&limit=15`);
-      if (!response.ok) return;
-
-      const data = await response.json();
-      const recommendedTracks = data.tracks || [];
+      const response = await api(`/recommendations/up-next?track_id=${track.id}&limit=15`);
+      const recommendedTracks = response.tracks || [];
 
       // Filter out current track
       const filtered = recommendedTracks.filter((t: any) => t.id !== track.id);
