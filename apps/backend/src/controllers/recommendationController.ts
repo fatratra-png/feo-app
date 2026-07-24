@@ -1,6 +1,7 @@
 import { Response } from 'express';
 import { AuthRequest } from '../middleware/auth';
 import { getUpNext, getUpNextFromQueue, recordSkip } from '../services/recommendationService';
+import { generateAISuggestions } from '../services/llmService';
 
 export async function upNext(req: AuthRequest, res: Response) {
   try {
@@ -42,5 +43,33 @@ export async function skip(req: AuthRequest, res: Response) {
   } catch (err) {
     console.error('Skip recording error:', err);
     res.status(500).json({ error: 'Failed to record skip' });
+  }
+}
+
+export async function aiSuggestions(req: AuthRequest, res: Response) {
+  try {
+    const { userPreference, currentMood, genre } = req.query;
+
+    const suggestions = await generateAISuggestions({
+      userPreference: (userPreference as string) || 'relaxing',
+      currentMood: (currentMood as string) || 'chill',
+      genre: (genre as string) || 'any',
+    });
+
+    if (!suggestions) {
+      return res.status(503).json({ 
+        error: 'AI suggestion service unavailable',
+        fallback: [
+          { query: 'trending music', explanation: 'Popular tracks right now' },
+          { query: 'relaxing ambient', explanation: 'Chill background music' },
+          { query: 'focus beats', explanation: 'Music for concentration' }
+        ]
+      });
+    }
+
+    res.json({ suggestions });
+  } catch (err) {
+    console.error('AI suggestion error:', err);
+    res.status(500).json({ error: 'Failed to generate suggestions' });
   }
 }

@@ -115,3 +115,22 @@ export const libraryApi = {
   getLibrary: () => api('/library'),
   getHome: () => api('/library/home'),
 };
+
+export const recommendationsApi = {
+  getUpNext: (trackId: string, limit?: number, manualQueue?: string[]) => {
+    const params = new URLSearchParams();
+    params.append('track_id', trackId);
+    if (limit) params.append('limit', String(limit));
+    if (manualQueue?.length) params.append('manual_queue', manualQueue.join(','));
+    return api(`/recommendations/up-next?${params}`);
+  },
+  recordSkip: (trackId: string) =>
+    api('/recommendations/skip', { method: 'POST', body: JSON.stringify({ track_id: trackId }) }),
+  getAISuggestions: (userPreference?: string, currentMood?: string, genre?: string) => {
+    const params = new URLSearchParams();
+    if (userPreference) params.append('userPreference', userPreference);
+    if (currentMood) params.append('currentMood', currentMood);
+    if (genre) params.append('genre', genre);
+    return api(`/recommendations/suggestions?${params}`);
+  },
+};
