@@ -22,18 +22,18 @@ import {
 
 export function PlayerPanel() {
   const [showQueue, setShowQueue] = useState(false);
-  const [isExpanded, setIsExpanded] = useState(true);
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
   const {
     currentTrack, isPlaying, volume, progress, queue, queueIndex,
     pause, next, previous, isLoadingAudio, repeat, autoPlay, shuffle, isMuted,
     setVolume, setProgress, cycleRepeat, toggleShuffle, toggleMute, toggleAutoPlay,
-    removeFromQueue, clearQueue, playNext,
+    removeFromQueue, clearQueue, playNext, isPanelCollapsed, togglePanel, expandPanel,
   } = usePlayerStore();
 
   const resume = useCallback(() => usePlayerStore.getState().resume(), []);
   const isOpen = !!currentTrack;
+  const isExpanded = !isPanelCollapsed;
 
   useEffect(() => {
     if (!audioRef.current) audioRef.current = new Audio();
@@ -84,11 +84,20 @@ export function PlayerPanel() {
 
   return (
     <>
+      {currentTrack && !isExpanded && (
+        <button
+          onClick={expandPanel}
+          className="fixed bottom-6 right-6 z-[60] size-14 rounded-full border-2 border-saffron bg-card brutal-shadow-saffron flex items-center justify-center hover:scale-110 active:scale-95 transition-transform"
+        >
+          <CD title={currentTrack.title} artist={currentTrack.artist_name} size="sm" />
+        </button>
+      )}
+
       <div
         className={`fixed top-0 right-0 h-full w-full md:w-[420px] bg-background border-l-2 border-border z-50 flex flex-col transition-all duration-500 ease-out ${
           isOpen ? 'translate-x-0' : 'translate-x-full'
         } md:translate-x-0 ${
-          isOpen ? 'md:translate-x-0' : 'md:translate-x-full'
+          isExpanded ? 'md:translate-x-0' : 'md:translate-x-full'
         }`}
       >
         <div className="h-1 w-full bg-gradient-to-r from-saffron via-blush to-mint flex-shrink-0" />
@@ -104,7 +113,7 @@ export function PlayerPanel() {
             <button onClick={() => setShowQueue(!showQueue)} className={`size-8 flex items-center justify-center rounded-full border-2 transition-all active:translate-y-[1px] ${showQueue ? 'border-saffron bg-saffron/15 text-saffron brutal-shadow-saffron' : 'border-border text-foreground/40 hover:text-foreground hover:bg-muted/30'}`}>
               <ListMusic className="size-3.5" />
             </button>
-            <button onClick={() => setIsExpanded(!isExpanded)} className={`size-8 flex items-center justify-center rounded-full border-2 transition-all active:translate-y-[1px] ${!isExpanded ? 'border-mint bg-mint/15 text-mint brutal-shadow-mint' : 'border-border text-foreground/40 hover:text-foreground hover:bg-muted/30'}`}>
+            <button onClick={togglePanel} className={`size-8 flex items-center justify-center rounded-full border-2 transition-all active:translate-y-[1px] ${!isExpanded ? 'border-mint bg-mint/15 text-mint brutal-shadow-mint' : 'border-border text-foreground/40 hover:text-foreground hover:bg-muted/30'}`}>
               <ChevronDown className={`size-3.5 transition-transform ${!isExpanded ? 'rotate-180' : ''}`} />
             </button>
           </div>

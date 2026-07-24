@@ -7,7 +7,8 @@ import { usePlayerStore } from '../../stores/playerStore';
 export function Layout() {
   useKeyboard();
   const currentTrack = usePlayerStore((s) => s.currentTrack);
-  const panelOpen = !!currentTrack;
+  const isPanelCollapsed = usePlayerStore((s) => s.isPanelCollapsed);
+  const panelOpen = !!currentTrack && !isPanelCollapsed;
 
   return (
     <div className="min-h-screen bg-background flex">

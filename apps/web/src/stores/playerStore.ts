@@ -33,6 +33,7 @@ interface PlayerState {
   crossfadeDuration: number;
   playHistory: Track[];
   gaplessPlayback: boolean;
+  isPanelCollapsed: boolean;
 
   play: (track: Track, queue?: Track[]) => void;
   setTrackAudioUrl: (trackId: string, url: string) => void;
@@ -60,6 +61,8 @@ interface PlayerState {
   getCurrentQueuePosition: () => number;
   getUpNext: () => Track[];
   populateQueueWithRecommendations: (track: Track) => Promise<void>;
+  togglePanel: () => void;
+  expandPanel: () => void;
 }
 
 function fetchAudio(track: Track): Promise<string | null> {
@@ -100,11 +103,27 @@ export const usePlayerStore = create<PlayerState>((set, get) => ({
   crossfadeDuration: parseFloat(localStorage.getItem('feo_crossfade_duration') || '3'),
   playHistory: [],
   gaplessPlayback: true,
+  isPanelCollapsed: false,
 
   play: (track, queue) => {
     const state = get();
-    const currentQueue = queue || state.queue;
-    const index = currentQueue.findIndex((t) => t.id === track.id);
+    let currentQueue;
+    let index;
+
+    if (queue) {
+      currentQueue = [...queue];
+      index = currentQueue.findIndex((t) => t.id === track.id);
+      if (index === -1) index = 0;
+    } else {
+      currentQueue = [...state.queue];
+      index = currentQueue.findIndex((t) => t.id === track.id);
+      if (index === -1) {
+        const insertAt = state.queueIndex >= 0 ? state.queueIndex + 1 : 0;
+        currentQueue.splice(insertAt, 0, track);
+        index = insertAt;
+      }
+    }
+
     const needsFetch = needsAudioFetch(track);
 
     const current = state.currentTrack;
@@ -118,8 +137,8 @@ export const usePlayerStore = create<PlayerState>((set, get) => ({
     set({
       currentTrack: track,
       queue: currentQueue,
-      originalQueue: queue || state.originalQueue,
-      queueIndex: index >= 0 ? index : 0,
+      originalQueue: queue ? currentQueue : state.originalQueue,
+      queueIndex: index,
       isPlaying: !needsFetch,
       progress: 0,
       isLoadingAudio: needsFetch,
@@ -168,8 +187,10 @@ export const usePlayerStore = create<PlayerState>((set, get) => ({
   },
 
   next: () => {
+    console.log('[DEBUG] next() called');
     const { queue, queueIndex, repeat, autoPlay, currentTrack, shuffle, originalQueue } = get();
     const history = [...get().playHistory];
+    console.log('[DEBUG] Queue state:', { queueLength: queue.length, queueIndex, repeat, autoPlay });
 
     if (currentTrack) {
       const existingIdx = history.findIndex(t => t.id === currentTrack.id);
@@ -185,7 +206,7 @@ export const usePlayerStore = create<PlayerState>((set, get) => ({
     let nextIndex = queueIndex + 1;
 
     if (nextIndex >= queue.length) {
-      if (repeat === 'all') {
+      if (repeat === 'all' && queue.length > 0) {
         nextIndex = 0;
         const nextTrack = queue[nextIndex];
         const needsFetch = needsAudioFetch(nextTrack);
@@ -280,7 +301,7 @@ export const usePlayerStore = create<PlayerState>((set, get) => ({
   },
 
   previous: () => {
-    const { queue, queueIndex } = get();
+    const { queue, queueIndex, playHistory } = get();
     const prevIndex = queueIndex - 1;
     if (prevIndex >= 0) {
       const prevTrack = queue[prevIndex];
@@ -291,6 +312,39 @@ export const usePlayerStore = create<PlayerState>((set, get) => ({
         isPlaying: !needsFetch,
         progress: 0,
         isLoadingAudio: needsFetch,
+      });
+      if (needsFetch && prevTrack.youtube_id) {
+        youtubeApi.getAudioUrl(prevTrack.youtube_id)
+          .then((data: any) => {
+            if (data.audioUrl) {
+              get().setTrackAudioUrl(prevTrack.id, data.audioUrl);
+              set({ isPlaying: true, isLoadingAudio: false });
+            }
+          })
+          .catch(() => set({ isLoadingAudio: false }));
+      }
+    } else if (playHistory.length > 0) {
+      const prevTrack = playHistory[playHistory.length - 1];
+      const newHistory = playHistory.slice(0, -1);
+      const needsFetch = needsAudioFetch(prevTrack);
+      const currentQueue = [...queue];
+      const cur = get().currentTrack;
+      if (cur && !currentQueue.find(t => t.id === cur.id)) {
+        currentQueue.splice(queueIndex >= 0 ? queueIndex : 0, 0, cur);
+      }
+      let newIndex = currentQueue.findIndex(t => t.id === prevTrack.id);
+      if (newIndex === -1) {
+        currentQueue.unshift(prevTrack);
+        newIndex = 0;
+      }
+      set({
+        currentTrack: prevTrack,
+        queue: currentQueue,
+        queueIndex: newIndex,
+        isPlaying: !needsFetch,
+        progress: 0,
+        isLoadingAudio: needsFetch,
+        playHistory: newHistory,
       });
       if (needsFetch && prevTrack.youtube_id) {
         youtubeApi.getAudioUrl(prevTrack.youtube_id)
@@ -441,9 +495,12 @@ export const usePlayerStore = create<PlayerState>((set, get) => ({
   },
 
   populateQueueWithRecommendations: async (track: Track) => {
+    console.log('[DEBUG] populateQueueWithRecommendations called for track:', track.title);
     try {
       const response = await api(`/recommendations/up-next?track_id=${track.id}&limit=15`);
+      console.log('[DEBUG] API response received:', response);
       const recommendedTracks = response.tracks || [];
+      console.log('[DEBUG] Recommended tracks count:', recommendedTracks.length);
 
       // Filter out current track
       const filtered = recommendedTracks.filter((t: any) => t.id !== track.id);
@@ -455,11 +512,15 @@ export const usePlayerStore = create<PlayerState>((set, get) => ({
         
         if (newTracks.length > 0) {
           const updatedQueue = [...currentQueue, ...newTracks].slice(0, 50); // Cap at 50 tracks
+          console.log('[DEBUG] Queue updated with', newTracks.length, 'new tracks. Total queue length:', updatedQueue.length);
           set({ queue: updatedQueue });
         }
       }
     } catch (err) {
-      console.error('Failed to populate queue:', err);
+      console.error('[DEBUG] Failed to populate queue:', err);
     }
   },
+
+  togglePanel: () => set((s) => ({ isPanelCollapsed: !s.isPanelCollapsed })),
+  expandPanel: () => set({ isPanelCollapsed: false }),
 }));
