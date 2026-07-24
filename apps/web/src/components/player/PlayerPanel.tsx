@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { usePlayerStore } from '../../stores/playerStore';
+import { NextTrackDisplay } from './NextTrackDisplay';
 import { CD } from '../ui/CD';
 import { formatDuration } from '../../lib/utils';
 import {
@@ -139,6 +140,8 @@ export function PlayerPanel() {
                   <span className="text-[9px] font-mono text-foreground/40 tabular-nums">{formatDuration(currentTrack.duration)}</span>
                 </div>
               </div>
+
+              <NextTrackDisplay />
 
               <div className="flex items-center justify-center gap-2 mt-8">
                 <button onClick={toggleShuffle} className={`size-10 flex items-center justify-center rounded-full border-2 transition-all hover:bg-saffron hover:text-black active:translate-y-[2px] brutal-shadow-sm ${shuffle ? 'border-saffron bg-saffron/15 text-saffron' : 'border-border text-foreground/40 hover:border-foreground/50'}`}>

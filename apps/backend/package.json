@@ -7,7 +7,9 @@
     "build": "tsc",
     "start": "node dist/index.js",
     "db:setup": "tsx src/db/setup.ts",
-    "db:seed": "tsx src/db/seed.ts"
+    "db:seed": "tsx src/db/seed.ts",
+    "test": "mocha --require tsx/cjs --extension ts 'tests/**/*.test.ts' --timeout 10000 --exit",
+    "test:watch": "mocha --require tsx/cjs --extension ts 'tests/**/*.test.ts' --timeout 10000 --watch --exit"
   },
   "dependencies": {
     "bcryptjs": "^2.4.3",
@@ -20,11 +22,15 @@
   },
   "devDependencies": {
     "@types/bcryptjs": "^2.4.6",
+    "@types/chai": "^4.3.11",
     "@types/cors": "^2.8.17",
     "@types/express": "^5.0.0",
     "@types/jsonwebtoken": "^9.0.7",
+    "@types/mocha": "^10.0.6",
     "@types/node": "^22.0.0",
     "@types/pg": "^8.11.0",
+    "chai": "^4.3.10",
+    "mocha": "^10.2.0",
     "tsx": "^4.19.0",
     "typescript": "^5.7.0"
   }
