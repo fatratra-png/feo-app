@@ -45,8 +45,17 @@ export function AISuggestions() {
       const results = await searchApi.search(query);
       const tracks = results.tracks || [];
       if (tracks.length > 0) {
-        tracks.forEach((track: any) => addToQueue(track));
-        alert(`Added ${Math.min(5, tracks.length)} tracks to queue!`);
+        // Play the first result
+        const firstTrack = tracks[0];
+        usePlayerStore.getState().play(firstTrack, tracks);
+        
+        // Rest of tracks added to queue
+        tracks.slice(1).forEach((track: any) => addToQueue(track));
+        
+        // Trigger AI recommendations based on new track
+        await usePlayerStore.getState().populateQueueWithRecommendations(firstTrack);
+        
+        alert(`Added ${tracks.length} tracks to queue!`);
       }
     } catch (err) {
       console.error('Search failed:', err);

@@ -58,6 +58,7 @@ interface PlayerState {
   setCrossfadeDuration: (seconds: number) => void;
   getCurrentQueuePosition: () => number;
   getUpNext: () => Track[];
+  populateQueueWithRecommendations: (track: Track) => Promise<void>;
 }
 
 function fetchAudio(track: Track): Promise<string | null> {
@@ -135,6 +136,11 @@ export const usePlayerStore = create<PlayerState>((set, get) => ({
         })
         .catch(() => set({ isLoadingAudio: false }));
     }
+
+    // Auto-populate queue with AI recommendations
+    setTimeout(() => {
+      get().populateQueueWithRecommendations(track);
+    }, 500);
   },
 
   setTrackAudioUrl: (trackId, url) => {
@@ -438,5 +444,31 @@ export const usePlayerStore = create<PlayerState>((set, get) => ({
   getUpNext: () => {
     const { queue, queueIndex } = get();
     return queue.slice(queueIndex + 1);
+  },
+
+  populateQueueWithRecommendations: async (track: Track) => {
+    try {
+      const response = await fetch(`/api/recommendations/up-next?track_id=${track.id}&limit=15`);
+      if (!response.ok) return;
+
+      const data = await response.json();
+      const recommendedTracks = data.tracks || [];
+
+      // Filter out current track
+      const filtered = recommendedTracks.filter((t: any) => t.id !== track.id);
+
+      if (filtered.length > 0) {
+        // Merge with existing queue, avoiding duplicates
+        const currentQueue = get().queue;
+        const newTracks = filtered.filter((t: any) => !currentQueue.find(q => q.id === t.id));
+        
+        if (newTracks.length > 0) {
+          const updatedQueue = [...currentQueue, ...newTracks].slice(0, 50); // Cap at 50 tracks
+          set({ queue: updatedQueue });
+        }
+      }
+    } catch (err) {
+      console.error('Failed to populate queue:', err);
+    }
   },
 }));

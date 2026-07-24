@@ -22,6 +22,7 @@ import {
 
 export function PlayerPanel() {
   const [showQueue, setShowQueue] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(true);
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
   const {
@@ -103,10 +104,13 @@ export function PlayerPanel() {
             <button onClick={() => setShowQueue(!showQueue)} className={`size-8 flex items-center justify-center rounded-full border-2 transition-all active:translate-y-[1px] ${showQueue ? 'border-saffron bg-saffron/15 text-saffron brutal-shadow-saffron' : 'border-border text-foreground/40 hover:text-foreground hover:bg-muted/30'}`}>
               <ListMusic className="size-3.5" />
             </button>
+            <button onClick={() => setIsExpanded(!isExpanded)} className={`size-8 flex items-center justify-center rounded-full border-2 transition-all active:translate-y-[1px] ${!isExpanded ? 'border-mint bg-mint/15 text-mint brutal-shadow-mint' : 'border-border text-foreground/40 hover:text-foreground hover:bg-muted/30'}`}>
+              <ChevronDown className={`size-3.5 transition-transform ${!isExpanded ? 'rotate-180' : ''}`} />
+            </button>
           </div>
         </div>
 
-        <div className="flex-1 flex flex-col items-center justify-center px-6 py-8 overflow-y-auto">
+        <div className={`flex-1 flex flex-col items-center justify-center px-6 py-8 overflow-y-auto transition-all duration-300 ${!isExpanded ? 'hidden' : ''}`}>
           {currentTrack && (
             <>
               <div className="relative mb-8 flex-shrink-0 -rotate-6 hover:rotate-0 transition-transform duration-500">
@@ -193,8 +197,8 @@ export function PlayerPanel() {
           )}
         </div>
 
-        {showQueue && currentTrack && (
-          <div className="border-t-2 border-border px-5 py-4 max-h-56 overflow-y-auto">
+        {showQueue && isExpanded && currentTrack && (
+          <div className="border-t-2 border-border px-5 py-4 max-h-56 overflow-y-auto transition-all duration-300">
             <div className="flex items-center justify-between mb-3">
               <span className="flex items-center gap-2">
                 <span className="eyebrow">Up Next</span>
